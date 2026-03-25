@@ -4,3 +4,15 @@ Project: frame-it
 Requested by: Maarten De Muynck
 
 Seeded at team creation.
+
+## Learnings
+
+- Implemented upload API (server/index.js) using Express + multer. Added server-side validation for required name, email, and photo; rejected files >5MB and non-image uploads.
+- Storage: local uploads kept under server/uploads/ with per-email folders (email hashed with sha256). TODOs added to migrate to cloud storage (S3/GCS), add virus scanning, encryption at rest, backups, and retention policies.
+- Files created/updated in this change:
+  - server/index.js
+  - package.json (added multer dependency)
+  - .squad/decisions/inbox/orion-upload-endpoint.md
+  - .squad/skills/backend-upload/SKILL.md
+
+Notes: local uploads/ directory is runtime-created and should not be relied on for production. Ensure backups and storage migration before accepting many uploads.
