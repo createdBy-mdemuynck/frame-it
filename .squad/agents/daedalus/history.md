@@ -10,3 +10,6 @@ Seeded at team creation.
 - Added coordinated dev scripts in root package.json using concurrently and nodemon.
 - Created decision record in .squad/decisions/inbox/daedalus-scaffold.md and a project-scaffold SKILL.
 
+## Learnings (2026-03-25)
+- Daedalus confirmed the initial scaffold and artifacts: /web, /server, and root package.json. Decisions were recorded and merged into .squad/decisions.md for team visibility.
+

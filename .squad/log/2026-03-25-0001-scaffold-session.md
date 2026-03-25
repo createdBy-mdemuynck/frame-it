@@ -1,0 +1,1 @@
+Scaffold session: Daedalus created project scaffold (Next.js + Express), Astra added a mobile-first upload UI prototype, and Calypso authored a detailed upload_flow test plan. Decisions from the inbox were merged into .squad/decisions.md and agent histories were annotated. All changed .squad files were committed.
