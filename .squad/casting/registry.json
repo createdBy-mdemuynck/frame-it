@@ -1,0 +1,9 @@
+{
+  "registry": [
+    {"persistent_name":"daedalus","universe":"voyagers","created_at":"2026-03-25T09:30:00Z","legacy_named":false,"status":"active"},
+    {"persistent_name":"astra","universe":"voyagers","created_at":"2026-03-25T09:30:00Z","legacy_named":false,"status":"active"},
+    {"persistent_name":"orion","universe":"voyagers","created_at":"2026-03-25T09:30:00Z","legacy_named":false,"status":"active"},
+    {"persistent_name":"calypso","universe":"voyagers","created_at":"2026-03-25T09:30:00Z","legacy_named":false,"status":"active"},
+    {"persistent_name":"scribe","universe":"voyagers","created_at":"2026-03-25T09:30:00Z","legacy_named":false,"status":"active"}
+  ]
+}

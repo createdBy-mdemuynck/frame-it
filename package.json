@@ -1,0 +1,21 @@
+{
+  "name": "frame-it",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MVP: upload images with metadata (Next.js frontend + Express backend)",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:web\" \"npm:dev:server\"",
+    "dev:web": "cd web && npm run dev",
+    "dev:server": "cd server && nodemon index.js",
+    "start": "node server/index.js",
+    "build:web": "cd web && npm run build",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.1",
+    "nodemon": "^2.0.22"
+  }
+}
