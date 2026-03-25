@@ -16,3 +16,6 @@ Seeded at team creation.
 
 ## Learnings (2026-03-25)
 - Calypso produced a comprehensive test plan; next is converting these plans into automated Jest tests once the scaffold wiring is complete.
+
+## Orchestration Entry - 2026-03-25T20:48:56Z
+- Calypso: test plan completed; merged decision into .squad/decisions.md and artifacts produced (tests/automation-plan.md, tests/test-skeletons).

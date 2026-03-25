@@ -16,3 +16,6 @@ Seeded at team creation.
   - .squad/skills/backend-upload/SKILL.md
 
 Notes: local uploads/ directory is runtime-created and should not be relied on for production. Ensure backups and storage migration before accepting many uploads.
+
+## Orchestration Entry - 2026-03-25T20:48:56Z
+- Orion: upload endpoint implementation in progress; decision moved to .squad/decisions.md.
