@@ -6,17 +6,19 @@
   "scripts": {
     "dev": "concurrently \"npm:dev:web\" \"npm:dev:server\"",
     "dev:web": "cd web && npm run dev",
-    "dev:server": "cd server && nodemon index.js",
+    "dev:server": "cd server && cross-env PORT=3001 nodemon index.js",
     "start": "node server/index.js",
     "build:web": "cd web && npm run build",
     "test": "echo \"No tests yet\" && exit 0"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "multer": "^1.4.4"
+    "multer": "^1.4.4",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
     "nodemon": "^2.0.22"
   }
 }
