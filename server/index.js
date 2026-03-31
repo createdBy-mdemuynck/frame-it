@@ -6,8 +6,26 @@ const multer = require("multer");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const sharp = require("sharp"); // Added for thumbnail generation
+const cors = require("cors");
 
 app.use(express.json());
+
+// Update CORS policy to be protocol-independent
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      try {
+        const u = new URL(origin);
+        // Allow any origin that uses port 4000 (protocol-independent)
+        if (u.port === "4000" || u.port == "3000") return callback(null, true);
+      } catch (err) {
+        // fall through to reject
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+  }),
+);
 
 // Ensure uploads root exists and serve statically at /uploads
 const uploadsRoot = path.join(__dirname, "uploads");
@@ -164,4 +182,4 @@ app.get("/uploads/:email?", (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+app.listen(PORT, () => console.log(`Server listening in container on ${PORT}, use port mapping to access from host`));

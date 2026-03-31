@@ -17,14 +17,16 @@ COPY . .
 # Fix permissions for node_modules/.bin (helps on Windows hosts)
 RUN chmod -R 755 node_modules/.bin
 
-# Build the Next.js application
+
+# Build and export the Next.js static site
 RUN npm run build
 
 # Use a lightweight web server for serving static files
 FROM nginx:alpine
 
-# Copy the built application from the builder stage
-COPY --from=builder /usr/src/app/.next /usr/share/nginx/html
+
+# Copy the exported static site to Nginx html directory
+COPY --from=builder /usr/src/app/out /usr/share/nginx/html
 
 # Expose the port the app runs on
 EXPOSE 80

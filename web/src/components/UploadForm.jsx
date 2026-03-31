@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export default function UploadForm() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [error, setError] = useState('');
-  const [status, setStatus] = useState('');
+  const [error, setError] = useState("");
+  const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   function resetMessages() {
-    setError('');
-    setStatus('');
+    setError("");
+    setStatus("");
   }
 
   function handleFileChange(e) {
@@ -25,7 +25,7 @@ export default function UploadForm() {
       return;
     }
     if (f.size > MAX_FILE_SIZE) {
-      setError('Photo is too large. Max size is 5MB.');
+      setError("Photo is too large. Max size is 5MB.");
       setFile(null);
       setPreview(null);
       return;
@@ -36,20 +36,20 @@ export default function UploadForm() {
 
   function validate() {
     if (!name.trim()) {
-      setError('Name is required.');
+      setError("Name is required.");
       return false;
     }
     if (!email.trim()) {
-      setError('Email is required.');
+      setError("Email is required.");
       return false;
     }
     // simple email check
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address.');
+      setError("Please enter a valid email address.");
       return false;
     }
     if (!file) {
-      setError('Please attach a photo.');
+      setError("Please attach a photo.");
       return false;
     }
     return true;
@@ -62,25 +62,25 @@ export default function UploadForm() {
     setSubmitting(true);
     try {
       const form = new FormData();
-      form.append('name', name);
-      form.append('email', email);
-      form.append('photo', file);
+      form.append("name", name);
+      form.append("email", email);
+      form.append("photo", file);
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
+      const res = await fetch("http://localhost:8080/api/upload", {
+        method: "POST",
         body: form,
       });
       if (!res.ok) {
         const txt = await res.text();
-        throw new Error(txt || 'Upload failed');
+        throw new Error(txt || "Upload failed");
       }
-      setStatus('Upload successful. Thank you!');
-      setName('');
-      setEmail('');
+      setStatus("Upload successful. Thank you!");
+      setName("");
+      setEmail("");
       setFile(null);
       setPreview(null);
     } catch (err) {
-      setError('Upload error: ' + (err.message || err));
+      setError("Upload error: " + (err.message || err));
     } finally {
       setSubmitting(false);
     }
@@ -92,13 +92,7 @@ export default function UploadForm() {
 
       <label className="field">
         <span className="label">Name</span>
-        <input
-          name="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your full name"
-          required
-        />
+        <input name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" required />
       </label>
 
       <label className="field">
@@ -115,13 +109,7 @@ export default function UploadForm() {
 
       <label className="field file-field">
         <span className="label">Photo</span>
-        <input
-          name="photo"
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleFileChange}
-        />
+        <input name="photo" type="file" accept="image/*" capture="environment" onChange={handleFileChange} />
         <small className="hint">Max 5MB. Use camera or choose a file.</small>
       </label>
 
@@ -135,7 +123,7 @@ export default function UploadForm() {
       {status && <div className="status">{status}</div>}
 
       <button className="submit" type="submit" disabled={submitting}>
-        {submitting ? 'Uploading…' : 'Submit'}
+        {submitting ? "Uploading…" : "Submit"}
       </button>
     </form>
   );
