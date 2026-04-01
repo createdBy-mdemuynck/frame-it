@@ -18,9 +18,10 @@ RUN npm install
 
 COPY . .
 
-# Expose the port the app runs on
+# Expose the port the app runs on (Cloud Run uses 8080)
 
-EXPOSE 3000
+ENV PORT=8080
+EXPOSE 8080
 
 # Start the application
 

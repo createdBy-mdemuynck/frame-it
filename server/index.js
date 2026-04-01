@@ -17,12 +17,12 @@ app.use(
       if (!origin) return callback(null, true);
       try {
         const u = new URL(origin);
-        // Allow any origin that uses port 4000 (protocol-independent)
-        if (u.port === "4000" || u.port == "3000") return callback(null, true);
+        // Allow origins containing localhost or frame-it
+        if (u.hostname.includes("localhost") || u.hostname.includes("frame-it")) return callback(null, true);
       } catch (err) {
         // fall through to reject
       }
-      return callback(new Error("Not allowed by CORS"));
+      return callback(new Error(`${origin} Not allowed by CORS`));
     },
   }),
 );

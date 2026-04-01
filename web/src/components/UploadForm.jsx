@@ -66,7 +66,10 @@ export default function UploadForm() {
       form.append("email", email);
       form.append("photo", file);
 
-      const res = await fetch("http://localhost:8080/api/upload", {
+      const base = "https://frame-it-server-842270474522.europe-west1.run.app";
+      const url = base.replace(/\/+$/, "") + "/api/upload";
+
+      const res = await fetch(url, {
         method: "POST",
         body: form,
       });
