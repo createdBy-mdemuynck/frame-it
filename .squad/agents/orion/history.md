@@ -19,4 +19,7 @@ Notes: local uploads/ directory is runtime-created and should not be relied on f
 
 ## Orchestration Entry - 2026-03-25T20:48:56Z
 - Orion: upload endpoint implementation in progress; decision moved to .squad/decisions.md.
-- Fixed startup port conflict by preferring PORT env var during local runs and starting the server on PORT=3002 to avoid interfering with an existing node process on port 3000. No code changes required; started server with: $env:PORT=3002; node index.js. Verified GET /health returns {\"status\":\"ok\"}.
+- Fixed startup port conflict by preferring PORT env var during local runs and starting the server on PORT=3002 to avoid interfering with an existing node process on port 3000. No code changes required; started server with: $env:PORT=3002; node index.js. Verified GET /health returns {"status":"ok"}.
+
+## Orchestration Entry - 2026-03-25T21:00:00Z
+- Orion: working on admin star feature (backend integration). See orchestration log for details.

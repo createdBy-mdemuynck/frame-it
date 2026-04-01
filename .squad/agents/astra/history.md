@@ -10,3 +10,6 @@ Seeded at team creation.
 ## Learnings (2026-03-25)
 - Astra delivered a mobile-first upload UI prototype and documented client-side limits (5MB). Integration with backend upload endpoint and accessibility/UX polish are next steps.
 
+## Orchestration Entry - 2026-03-25T21:00:00Z
+- Astra: working on admin star feature (frontend integration). See orchestration log for details.
+
