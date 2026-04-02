@@ -2,9 +2,56 @@
 
 A full-stack photo voting application with frontoffice (user upload) and backoffice (admin voting/leaderboard).
 
+## 🚀 Quick Start
+
+### Option 1: Docker/Podman (Recommended)
+
+**With docker-compose or podman-compose:**
+```bash
+# Podman (if podman-compose is installed):
+podman-compose up -d
+
+# Docker:
+docker-compose up -d
+```
+
+**With Podman (manual - podman-compose not required):**
+```bash
+# Build images
+podman build -t frameit-backoffice:latest -f server/Dockerfile server
+podman build -t frameit-frontoffice:latest -f web/Dockerfile web
+
+# Create network
+podman network create frameit-network
+
+# Run containers
+podman run -d --name frameit-backoffice --network frameit-network -p 3001:3001 -e PORT=3001 -e NODE_ENV=production -e SESSION_SECRET=your-secret -v "${PWD}/server/uploads:/app/uploads:z" frameit-backoffice:latest
+
+podman run -d --name frameit-frontoffice --network frameit-network -p 3000:3000 -e NODE_ENV=production -e NEXT_PUBLIC_API_URL=http://localhost:3001 frameit-frontoffice:latest
+```
+
+**Development (with hot reload):**
+```bash
+# Podman:
+podman-compose -f docker-compose.dev.yml up
+
+# Docker:
+docker-compose -f docker-compose.dev.yml up
+```
+
+📖 **Podman without podman-compose?** See [PODMAN_COMMANDS.md](PODMAN_COMMANDS.md) for full manual command reference  
+📖 **Docker/Podman Compose?** See [DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md) for full guide (works with both!)
+
+### Option 2: Manual Setup
+
+Continue to [Installation & Setup](#installation--setup) below.
+
+---
+
 ## Features
 
 ### Frontoffice (User-facing)
+
 - 📸 Mobile-friendly photo upload
 - 📷 Camera or gallery selection
 - 💾 Automatic name/email persistence (localStorage)
@@ -12,6 +59,7 @@ A full-stack photo voting application with frontoffice (user upload) and backoff
 - 🖼️ Thumbnail generation (150x150px)
 
 ### Backoffice (Admin)
+
 - 🔐 Email-based admin login with sessions
 - 🖼️ Photo gallery with star voting
 - 🏆 Leaderboard sorted by votes
@@ -28,35 +76,91 @@ A full-stack photo voting application with frontoffice (user upload) and backoff
 
 ## Installation & Setup
 
-### 1. Install Server Dependencies
+### Prerequisites
+
+- **With Containers:** Podman or Docker installed
+- **Without Containers:** Node.js 18+ installed
+
+### Option A: Container Setup (Recommended)
+
+**1. Production Deployment:**
+```bash
+# Podman:
+podman-compose up -d
+
+# Docker:
+docker-compose up -d
+```
+
+**2. Development with Hot Reload:**
+```bash
+# Podman:
+podman-compose -f docker-compose.dev.yml up
+
+# Docker:
+docker-compose -f docker-compose.dev.yml up
+```
+
+Access:
+- Frontoffice: http://localhost:3000
+- Backoffice: http://localhost:3001
+
+📖 **Full Docker guide:** [DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)
+
+---
+
+### Option B: Manual Setup
+
+**1. Install Server Dependencies**
+
 ```bash
 cd server
 npm install
 ```
 
-### 2. Install Web Dependencies
+**2. Install Web Dependencies**
+
 ```bash
 cd ../web
 npm install
 ```
 
-### 3. Start the Server (Backoffice)
+**3. Create Environment Files**
+
+**server/.env:**
+```env
+PORT=3001
+SESSION_SECRET=frame-it-secret-key-change-in-production
+```
+
+**web/.env.local:**
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+**4. Start the Server (Backoffice)**
+
 ```bash
 cd server
 npm run dev
 ```
+
 Server runs on: **http://localhost:3001**
 
-### 4. Start the Web App (Frontoffice)
+**5. Start the Web App (Frontoffice)**
+
+In a new terminal:
 ```bash
 cd web
 npm run dev
 ```
+
 Web app runs on: **http://localhost:3000**
 
 ## Usage
 
 ### For Users (Frontoffice)
+
 1. Visit **http://localhost:3000**
 2. Enter your name and email (saved automatically for future uploads)
 3. Choose "Use Camera" or "Choose from Gallery"
@@ -77,12 +181,14 @@ Your name and email are remembered in your browser for future uploads.
    - **Leaderboard**: http://localhost:3001/leaderboard
 
 #### Gallery Features
+
 - View all uploaded photos as thumbnails
 - Click ⭐ button to vote for a photo
 - Star count updates in real-time
 - Each admin can vote once per photo
 
 #### Leaderboard Features
+
 - Photos sorted by star count (highest first)
 - Top 3 get special medals (🥇🥈🥉)
 - Click photo thumbnail to expand metadata
@@ -93,12 +199,14 @@ Your name and email are remembered in your browser for future uploads.
 ### Environment Variables
 
 **Server** (`server/.env`):
+
 ```env
 PORT=3001
 SESSION_SECRET=your-secret-key-change-in-production
 ```
 
 **Web** (`web/.env.local`):
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
@@ -133,12 +241,14 @@ frame-it/
 ## API Endpoints
 
 ### Public Endpoints
+
 - `POST /api/upload` - Upload photo with name, email, and file
   - Max file size: 5MB
-  - Accepted: image/* types only
+  - Accepted: image/\* types only
   - Returns: success status and filename
 
 ### Admin Endpoints (require session)
+
 - `POST /api/admin/login` - Login with email
 - `GET /api/admin/session` - Check if logged in
 - `POST /api/admin/logout` - End session
@@ -148,6 +258,7 @@ frame-it/
 - `GET /api/leaderboard` - Get photos sorted by stars (starred only)
 
 ### Admin HTML Pages
+
 - `GET /admin` - Login page
 - `GET /admin/gallery` - Photo gallery with voting interface
 - `GET /admin/leaderboard` - Ranked photos display
@@ -155,7 +266,9 @@ frame-it/
 ## Data Storage
 
 ### Photo Metadata
+
 Each uploaded photo creates:
+
 1. **Image file**: `uploads/[email]/[timestamp]_[filename]`
 2. **Metadata JSON**: `uploads/[email]/[timestamp]_[filename].json`
    ```json
@@ -169,7 +282,9 @@ Each uploaded photo creates:
 3. **Thumbnail**: `uploads/[email]/thumbnails/[timestamp]_[filename]`
 
 ### Vote Tracking
+
 Votes stored in `uploads/.stars.json`:
+
 ```json
 {
   "/uploads/user@example.com/photo.jpg": {
@@ -182,33 +297,43 @@ Votes stored in `uploads/.stars.json`:
 ## Troubleshooting
 
 ### "CORS Error" or "Network Error"
-✅ **Solution**: 
+
+✅ **Solution**:
+
 - Ensure both servers are running (web on 3000, server on 3001)
 - API URL must use `http://` not `https://`
 - Check `.env.local` has correct API URL
 
 ### "Cannot connect to server"
+
 ✅ **Solution**:
+
 - Start server: `cd server && npm run dev`
 - Verify port 3001 is available
 - Check server console for startup errors
 
 ### Photos not uploading
+
 ✅ **Solution**:
+
 - File must be under 5MB
 - File must be an image format (jpg, png, gif, webp, etc.)
 - Check browser console for validation errors
 - Verify `uploads/` directory is writable
 
 ### Session/Login issues
+
 ✅ **Solution**:
+
 - Clear browser cookies for localhost
 - Check server console for session middleware errors
 - Restart server to reset all sessions
 - Verify express-session is installed
 
 ### Web dev server fails to start
+
 ✅ **Solution**:
+
 - Remove `output: "export"` from `next.config.js` ✓ (already fixed)
 - Install dependencies: `cd web && npm install`
 - Check for port 3000 conflicts
@@ -216,12 +341,14 @@ Votes stored in `uploads/.stars.json`:
 ## Development
 
 ### Server (with auto-reload)
+
 ```bash
 cd server
 npm run dev  # Uses nodemon
 ```
 
 ### Web (with hot reload)
+
 ```bash
 cd web
 npm run dev  # Next.js dev server
@@ -230,6 +357,7 @@ npm run dev  # Next.js dev server
 ## Production Build
 
 ### Web
+
 ```bash
 cd web
 npm run build
@@ -237,6 +365,7 @@ npm start
 ```
 
 ### Server
+
 ```bash
 cd server
 npm start  # Regular node (not nodemon)
@@ -245,6 +374,7 @@ npm start  # Regular node (not nodemon)
 ## Security Notes
 
 ⚠️ **Current Implementation** (Development/MVP):
+
 - Session secret should be changed in production
 - No rate limiting on uploads
 - Email validation is basic
@@ -252,6 +382,7 @@ npm start  # Regular node (not nodemon)
 - Files stored locally (not cloud storage)
 
 🔒 **Before Production**:
+
 - [ ] Change SESSION_SECRET to a secure random value
 - [ ] Add proper admin user authentication
 - [ ] Implement upload rate limiting

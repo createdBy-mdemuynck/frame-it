@@ -1,0 +1,16 @@
+# Docker ignore patterns
+node_modules
+npm-debug.log
+.next
+.git
+.gitignore
+README.md
+.env.local
+.env*.local
+*.md
+.vscode
+.DS_Store
+dist
+build
+coverage
+.nyc_output

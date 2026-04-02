@@ -20,7 +20,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }, // 24 hours
-  })
+  }),
 );
 
 // Update CORS policy to be protocol-independent
@@ -63,7 +63,7 @@ const upload = multer({
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
-const uploadHandler = (req, res) => {
+const uploadHandler = async (req, res) => {
   try {
     const { name, email } = req.body || {};
     // Validate presence of fields
@@ -90,22 +90,23 @@ const uploadHandler = (req, res) => {
     const finalName = `${timestamp}_${safeName}`;
     const finalPath = path.join(userDir, finalName);
 
-    fs.renameSync(req.file.path, finalPath);
+    console.log(`📁 Upload paths:
+      - Temp file: ${req.file.path}
+      - Temp exists: ${fs.existsSync(req.file.path)}
+      - Final path: ${finalPath}
+      - User dir: ${userDir}`);
 
-    // Generate thumbnail
-    const thumbnailsDir = path.join(userDir, "thumbnails");
-    fs.mkdirSync(thumbnailsDir, { recursive: true });
-    const thumbnailPath = path.join(thumbnailsDir, finalName);
-
-    sharp(finalPath)
-      .resize(150, 150) // Resize to 150x150 pixels
-      .toFile(thumbnailPath)
-      .then(() => {
-        console.log(`Thumbnail generated: ${thumbnailPath}`);
-      })
-      .catch((err) => {
-        console.error("Error generating thumbnail:", err);
-      });
+    // Rename the file
+    try {
+      fs.renameSync(req.file.path, finalPath);
+      console.log(`✅ File moved successfully to ${finalPath}`);
+    } catch (renameError) {
+      console.error(`❌ Rename failed:`, renameError);
+      // Try copy + delete as fallback (works across mount points)
+      fs.copyFileSync(req.file.path, finalPath);
+      fs.unlinkSync(req.file.path);
+      console.log(`✅ File copied (fallback) to ${finalPath}`);
+    }
 
     // Save metadata
     const metadataPath = path.join(userDir, `${timestamp}_${safeName}.json`);
@@ -117,7 +118,43 @@ const uploadHandler = (req, res) => {
     };
     fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
 
-    return res.json({ success: true, message: "File uploaded and thumbnail generated", file: finalName });
+    // Respond immediately to the user
+    res.json({ success: true, message: "File uploaded successfully", file: finalName });
+
+    // Generate thumbnail asynchronously in background (don't await, don't block response)
+    const thumbnailsDir = path.join(userDir, "thumbnails");
+    fs.mkdirSync(thumbnailsDir, { recursive: true });
+    const thumbnailPath = path.join(thumbnailsDir, finalName);
+
+    // Use setImmediate to ensure this runs after response is sent
+    setImmediate(async () => {
+      try {
+        // Give filesystem extra time to sync after volume mount
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        console.log(`📸 Background: Processing thumbnail for ${finalPath}`);
+        
+        await sharp(finalPath)
+          .resize(150, 150, { fit: 'cover' })
+          .toFile(thumbnailPath);
+        
+        console.log(`✅ Background: Thumbnail generated ${thumbnailPath}`);
+      } catch (thumbError) {
+        console.error(`❌ Background: Thumbnail generation failed for ${finalPath}:`, thumbError.message);
+        // Try again after a longer delay
+        setTimeout(async () => {
+          try {
+            await sharp(finalPath)
+              .resize(150, 150, { fit: 'cover' })
+              .toFile(thumbnailPath);
+            console.log(`✅ Background retry: Thumbnail generated ${thumbnailPath}`);
+          } catch (retryError) {
+            console.error(`❌ Background retry also failed for ${finalPath}:`, retryError.message);
+          }
+        }, 2000);
+      }
+    });
+
   } catch (error) {
     console.error("Error handling upload:", error);
     res.status(500).json({ success: false, error: "Internal server error" });
@@ -245,7 +282,9 @@ app.post("/admin/unstar", express.urlencoded({ extended: true }), (req, res) => 
     stars[photoPath].count = Math.max(0, stars[photoPath].count - 1);
     saveStars(stars);
   }
-  res.send(`<p>Photo unstarred! Current stars: ${stars[photoPath] ? stars[photoPath].count : 0}</p><a href=\"/admin/star-panel\">Back</a>`);
+  res.send(
+    `<p>Photo unstarred! Current stars: ${stars[photoPath] ? stars[photoPath].count : 0}</p><a href=\"/admin/star-panel\">Back</a>`,
+  );
 });
 
 // GET /admin/star-count?photoPath=... — get star count for a photo (HTML)
@@ -259,7 +298,8 @@ app.get("/admin/star-count", (req, res) => {
 // GET /admin/most-starred — get the most-starred photo (HTML)
 app.get("/admin/most-starred", (req, res) => {
   const stars = loadStars();
-  let max = 0, most = null;
+  let max = 0,
+    most = null;
   for (const [photoPath, data] of Object.entries(stars)) {
     if (data.count > max) {
       max = data.count;
@@ -267,13 +307,17 @@ app.get("/admin/most-starred", (req, res) => {
     }
   }
   if (!most) return res.send(`<p>No stars yet.</p><a href=\"/admin/star-panel\">Back</a>`);
-  res.send(`<p>Most-starred photo: ${most.photoPath} (${most.count} stars)</p><img src=\"${most.photoPath}\" style=\"max-width:300px;\"><br><a href=\"/admin/star-panel\">Back</a>`);
+  res.send(
+    `<p>Most-starred photo: ${most.photoPath} (${most.count} stars)</p><img src=\"${most.photoPath}\" style=\"max-width:300px;\"><br><a href=\"/admin/star-panel\">Back</a>`,
+  );
 });
 
 // GET /admin/star-counts — get all star counts (HTML table)
 app.get("/admin/star-counts", (req, res) => {
   const stars = loadStars();
-  const rows = Object.entries(stars).map(([photoPath, data]) => `<tr><td>${photoPath}</td><td>${data.count}</td></tr>`).join("");
+  const rows = Object.entries(stars)
+    .map(([photoPath, data]) => `<tr><td>${photoPath}</td><td>${data.count}</td></tr>`)
+    .join("");
   res.send(`<table border=\"1\"><tr><th>Photo</th><th>Stars</th></tr>${rows}</table><a href=\"/admin/star-panel\">Back</a>`);
 });
 
@@ -281,10 +325,10 @@ app.get("/admin/star-counts", (req, res) => {
 app.get("/admin/star-panel", (req, res) => {
   // List all photos (flatten all user folders)
   let photos = [];
-  readdirSync(uploadsRoot, { withFileTypes: true }).forEach(dirent => {
+  readdirSync(uploadsRoot, { withFileTypes: true }).forEach((dirent) => {
     if (dirent.isDirectory() && dirent.name !== "tmp") {
       const userDir = path.join(uploadsRoot, dirent.name);
-      readdirSync(userDir, { withFileTypes: true }).forEach(file => {
+      readdirSync(userDir, { withFileTypes: true }).forEach((file) => {
         if (file.isFile() && !file.name.endsWith(".json")) {
           photos.push(`/uploads/${dirent.name}/${file.name}`);
         }
@@ -292,8 +336,15 @@ app.get("/admin/star-panel", (req, res) => {
     }
   });
   const stars = loadStars();
-  const rows = photos.map(photoPath => `<tr><td><img src=\"${photoPath}\" style=\"max-width:100px;\"></td><td>${stars[photoPath]?.count || 0}</td><td><form method=\"POST\" action=\"/admin/star\"><input type=\"hidden\" name=\"photoPath\" value=\"${photoPath}\"><input type=\"text\" name=\"userId\" placeholder=\"User ID\"><button type=\"submit\">Star</button></form></td><td><form method=\"POST\" action=\"/admin/unstar\"><input type=\"hidden\" name=\"photoPath\" value=\"${photoPath}\"><input type=\"text\" name=\"userId\" placeholder=\"User ID\"><button type=\"submit\">Unstar</button></form></td></tr>`).join("");
-  res.send(`<h1>Admin Star Panel</h1><table border=\"1\"><tr><th>Photo</th><th>Stars</th><th>Star</th><th>Unstar</th></tr>${rows}</table><br><a href=\"/admin/most-starred\">Most Starred</a> | <a href=\"/admin/star-counts\">All Star Counts</a>`);
+  const rows = photos
+    .map(
+      (photoPath) =>
+        `<tr><td><img src=\"${photoPath}\" style=\"max-width:100px;\"></td><td>${stars[photoPath]?.count || 0}</td><td><form method=\"POST\" action=\"/admin/star\"><input type=\"hidden\" name=\"photoPath\" value=\"${photoPath}\"><input type=\"text\" name=\"userId\" placeholder=\"User ID\"><button type=\"submit\">Star</button></form></td><td><form method=\"POST\" action=\"/admin/unstar\"><input type=\"hidden\" name=\"photoPath\" value=\"${photoPath}\"><input type=\"text\" name=\"userId\" placeholder=\"User ID\"><button type=\"submit\">Unstar</button></form></td></tr>`,
+    )
+    .join("");
+  res.send(
+    `<h1>Admin Star Panel</h1><table border=\"1\"><tr><th>Photo</th><th>Stars</th><th>Star</th><th>Unstar</th></tr>${rows}</table><br><a href=\"/admin/most-starred\">Most Starred</a> | <a href=\"/admin/star-counts\">All Star Counts</a>`,
+  );
 });
 // --- End Admin Star Feature API (HTML responses) ---
 
@@ -324,31 +375,33 @@ app.get("/api/gallery", (req, res) => {
   try {
     const photos = [];
     const stars = loadStars();
-    const folders = fs.readdirSync(uploadsRoot, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory() && dirent.name !== "tmp");
-    
-    folders.forEach(folder => {
+    const folders = fs
+      .readdirSync(uploadsRoot, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory() && dirent.name !== "tmp");
+
+    folders.forEach((folder) => {
       const userDir = path.join(uploadsRoot, folder.name);
-      const files = fs.readdirSync(userDir, { withFileTypes: true })
-        .filter(file => file.isFile() && !file.name.endsWith(".json") && !file.name.startsWith('.'));
-      
-      files.forEach(file => {
+      const files = fs
+        .readdirSync(userDir, { withFileTypes: true })
+        .filter((file) => file.isFile() && !file.name.endsWith(".json") && !file.name.startsWith("."));
+
+      files.forEach((file) => {
         const photoPath = `/uploads/${folder.name}/${file.name}`;
         const thumbnailPath = `/uploads/${folder.name}/thumbnails/${file.name}`;
         const metadataPath = path.join(userDir, `${file.name}.json`);
-        
+
         let metadata = {};
         if (fs.existsSync(metadataPath)) {
           try {
-            metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+            metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
           } catch (err) {
             console.error(`Error reading metadata for ${file.name}:`, err);
           }
         }
-        
+
         const starData = stars[photoPath] || { count: 0, starredBy: [] };
         const starred = req.session.adminEmail ? starData.starredBy.includes(req.session.adminEmail) : false;
-        
+
         photos.push({
           photoPath,
           thumbnailPath,
@@ -359,7 +412,7 @@ app.get("/api/gallery", (req, res) => {
         });
       });
     });
-    
+
     res.json({ success: true, photos });
   } catch (error) {
     console.error("Error fetching gallery:", error);
@@ -372,25 +425,25 @@ app.post("/api/admin/star", (req, res) => {
   if (!req.session.adminEmail) {
     return res.status(401).json({ success: false, error: "Not authenticated" });
   }
-  
+
   const { photoPath } = req.body;
   if (!photoPath) {
     return res.status(400).json({ success: false, error: "Missing photoPath" });
   }
-  
+
   const userId = req.session.adminEmail;
   const stars = loadStars();
-  
+
   if (!stars[photoPath]) {
     stars[photoPath] = { count: 0, starredBy: [] };
   }
-  
+
   if (!stars[photoPath].starredBy.includes(userId)) {
     stars[photoPath].starredBy.push(userId);
     stars[photoPath].count++;
     saveStars(stars);
   }
-  
+
   res.json({ success: true, count: stars[photoPath].count, starred: true });
 });
 
@@ -398,21 +451,21 @@ app.post("/api/admin/unstar", (req, res) => {
   if (!req.session.adminEmail) {
     return res.status(401).json({ success: false, error: "Not authenticated" });
   }
-  
+
   const { photoPath } = req.body;
   if (!photoPath) {
     return res.status(400).json({ success: false, error: "Missing photoPath" });
   }
-  
+
   const userId = req.session.adminEmail;
   const stars = loadStars();
-  
+
   if (stars[photoPath] && stars[photoPath].starredBy.includes(userId)) {
-    stars[photoPath].starredBy = stars[photoPath].starredBy.filter(id => id !== userId);
+    stars[photoPath].starredBy = stars[photoPath].starredBy.filter((id) => id !== userId);
     stars[photoPath].count = Math.max(0, stars[photoPath].count - 1);
     saveStars(stars);
   }
-  
+
   const count = stars[photoPath] ? stars[photoPath].count : 0;
   res.json({ success: true, count, starred: false });
 });
@@ -422,31 +475,33 @@ app.get("/api/leaderboard", (req, res) => {
   try {
     const stars = loadStars();
     const photos = [];
-    
-    const folders = fs.readdirSync(uploadsRoot, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory() && dirent.name !== "tmp");
-    
-    folders.forEach(folder => {
+
+    const folders = fs
+      .readdirSync(uploadsRoot, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory() && dirent.name !== "tmp");
+
+    folders.forEach((folder) => {
       const userDir = path.join(uploadsRoot, folder.name);
-      const files = fs.readdirSync(userDir, { withFileTypes: true })
-        .filter(file => file.isFile() && !file.name.endsWith(".json") && !file.name.startsWith('.'));
-      
-      files.forEach(file => {
+      const files = fs
+        .readdirSync(userDir, { withFileTypes: true })
+        .filter((file) => file.isFile() && !file.name.endsWith(".json") && !file.name.startsWith("."));
+
+      files.forEach((file) => {
         const photoPath = `/uploads/${folder.name}/${file.name}`;
         const starCount = stars[photoPath] ? stars[photoPath].count : 0;
-        
+
         // Only include photos with at least one star
         if (starCount > 0) {
           const metadataPath = path.join(userDir, `${file.name}.json`);
           let metadata = {};
           if (fs.existsSync(metadataPath)) {
             try {
-              metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+              metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
             } catch (err) {
               console.error(`Error reading metadata for ${file.name}:`, err);
             }
           }
-          
+
           photos.push({
             photoPath,
             starCount,
@@ -456,10 +511,10 @@ app.get("/api/leaderboard", (req, res) => {
         }
       });
     });
-    
+
     // Sort by star count (descending)
     photos.sort((a, b) => b.starCount - a.starCount);
-    
+
     res.json({ success: true, photos });
   } catch (error) {
     console.error("Error fetching leaderboard:", error);
@@ -476,7 +531,7 @@ app.get("/", (req, res) => {
   if (req.session.adminEmail) {
     return res.redirect("/gallery");
   }
-  
+
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -655,7 +710,7 @@ app.get("/gallery", (req, res) => {
   if (!req.session.adminEmail) {
     return res.redirect("/");
   }
-  
+
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -881,7 +936,7 @@ app.get("/leaderboard", (req, res) => {
   if (!req.session.adminEmail) {
     return res.redirect("/");
   }
-  
+
   res.send(`
     <!DOCTYPE html>
     <html>

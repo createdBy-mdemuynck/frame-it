@@ -1,0 +1,32 @@
+# Development Dockerfile with hot reload
+FROM node:20-alpine
+
+# Install dependencies for Sharp (image processing)
+RUN apk add --no-cache \
+    vips-dev \
+    fftw-dev \
+    build-base \
+    python3 \
+    pkgconfig
+
+WORKDIR /app
+
+# Install nodemon globally for hot reload
+RUN npm install -g nodemon
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies and rebuild Sharp
+RUN npm install && \
+    npm rebuild sharp
+
+# Copy application code
+COPY . .
+
+# Create uploads directory
+RUN mkdir -p uploads/tmp
+
+EXPOSE 3001
+
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,54 @@
+# Development docker-compose with hot reload
+version: '3.8'
+
+services:
+  # Backoffice (Server/API) - Development
+  backoffice:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: frameit-backoffice-dev
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+      - SESSION_SECRET=frameit-dev-secret
+    volumes:
+      # Mount source code for hot reload
+      - ./server:/app
+      - /app/node_modules
+      # Mount uploads to persist data
+      - ./server/uploads:/app/uploads
+    networks:
+      - frameit-network
+    command: npm run dev
+    restart: unless-stopped
+
+  # Frontoffice (Web/UI) - Development
+  frontoffice:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    container_name: frameit-frontoffice-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - WATCHPACK_POLLING=true
+    volumes:
+      # Mount source code for hot reload
+      - ./web:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - frameit-network
+    depends_on:
+      - backoffice
+    command: npm run dev
+    restart: unless-stopped
+
+networks:
+  frameit-network:
+    driver: bridge

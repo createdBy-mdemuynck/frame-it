@@ -10,7 +10,7 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
-console.log('API_BASE configured as:', API_BASE); // Debug log
+console.log("API_BASE configured as:", API_BASE); // Debug log
 
 export default function UploadForm() {
   const [name, setName] = useState("");
@@ -25,22 +25,22 @@ export default function UploadForm() {
 
   // Load saved name and email from localStorage on mount
   useEffect(() => {
-    const savedName = localStorage.getItem('userName');
-    const savedEmail = localStorage.getItem('userEmail');
+    const savedName = localStorage.getItem("userName");
+    const savedEmail = localStorage.getItem("userEmail");
     if (savedName) setName(savedName);
     if (savedEmail) setEmail(savedEmail);
-    
+
     // Check server connectivity
     checkServerHealth();
   }, []);
 
   // Save name and email to localStorage when they change
   useEffect(() => {
-    if (name) localStorage.setItem('userName', name);
+    if (name) localStorage.setItem("userName", name);
   }, [name]);
 
   useEffect(() => {
-    if (email) localStorage.setItem('userEmail', email);
+    if (email) localStorage.setItem("userEmail", email);
   }, [email]);
 
   async function checkServerHealth() {
@@ -52,7 +52,7 @@ export default function UploadForm() {
         setServerStatus("error");
       }
     } catch (err) {
-      console.error('Server health check failed:', err);
+      console.error("Server health check failed:", err);
       setServerStatus("offline");
     }
   }
@@ -117,33 +117,33 @@ export default function UploadForm() {
       form.append("photo", file);
 
       const url = `${API_BASE}/api/upload`;
-      console.log('=== UPLOAD DEBUG ===');
-      console.log('API_BASE:', API_BASE);
-      console.log('Upload URL:', url);
-      console.log('Form data - name:', name, 'email:', email, 'file:', file?.name);
+      console.log("=== UPLOAD DEBUG ===");
+      console.log("API_BASE:", API_BASE);
+      console.log("Upload URL:", url);
+      console.log("Form data - name:", name, "email:", email, "file:", file?.name);
 
       const res = await fetch(url, {
         method: "POST",
         body: form,
       });
-      
-      console.log('Response status:', res.status);
-      console.log('Response URL:', res.url);
-      
+
+      console.log("Response status:", res.status);
+      console.log("Response URL:", res.url);
+
       if (!res.ok) {
         const txt = await res.text();
-        console.error('Upload failed - Status:', res.status);
-        console.error('Upload failed - Response:', txt.substring(0, 500)); // First 500 chars
-        
+        console.error("Upload failed - Status:", res.status);
+        console.error("Upload failed - Response:", txt.substring(0, 500)); // First 500 chars
+
         // Check if we got an HTML response (wrong server)
-        if (txt.includes('<!DOCTYPE html>') || txt.includes('<html>')) {
-          throw new Error('Upload went to wrong server. Make sure backend is running on port 3001.');
+        if (txt.includes("<!DOCTYPE html>") || txt.includes("<html>")) {
+          throw new Error("Upload went to wrong server. Make sure backend is running on port 3001.");
         }
-        
+
         throw new Error(txt || "Upload failed");
       }
       const data = await res.json();
-      console.log('Upload success:', data); // Debug log
+      console.log("Upload success:", data); // Debug log
       setStatus("Upload successful. Thank you!");
       // Don't clear name and email - they're saved in localStorage
       setFile(null);
@@ -161,13 +161,9 @@ export default function UploadForm() {
       <h1 className="title">Send a Photo</h1>
 
       {serverStatus === "offline" && (
-        <div className="error">
-          ⚠️ Cannot connect to server at {API_BASE}. Make sure the server is running on port 3001.
-        </div>
+        <div className="error">⚠️ Cannot connect to server at {API_BASE}. Make sure the server is running on port 3001.</div>
       )}
-      {serverStatus === "checking" && (
-        <div className="status">Checking server connection...</div>
-      )}
+      {serverStatus === "checking" && <div className="status">Checking server connection...</div>}
 
       <label className="field">
         <span className="label">Name</span>
