@@ -13,7 +13,7 @@ export default function UploadForm() {
   const [inputMode, setInputMode] = useState(null); // 'camera' or 'gallery'
   const [serverStatus, setServerStatus] = useState("checking");
   const [apiUrl, setApiUrl] = useState("http://localhost:3001"); // Default
-  
+
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
 
@@ -220,18 +220,10 @@ export default function UploadForm() {
       <div className="field file-field">
         <span className="label">Photo</span>
         <div className="input-mode-buttons">
-          <button
-            type="button"
-            className={`mode-button ${inputMode === "camera" ? "active" : ""}`}
-            onClick={handleCameraClick}
-          >
+          <button type="button" className={`mode-button ${inputMode === "camera" ? "active" : ""}`} onClick={handleCameraClick}>
             📷 Use Camera
           </button>
-          <button
-            type="button"
-            className={`mode-button ${inputMode === "gallery" ? "active" : ""}`}
-            onClick={handleGalleryClick}
-          >
+          <button type="button" className={`mode-button ${inputMode === "gallery" ? "active" : ""}`} onClick={handleGalleryClick}>
             🖼️ Choose from Gallery
           </button>
         </div>
