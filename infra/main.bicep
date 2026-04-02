@@ -188,6 +188,10 @@ module frontoffice 'core/host/container-app.bicep' = {
         value: 'production'
       }
       {
+        name: 'API_URL'
+        value: 'https://${backoffice.outputs.fqdn}'
+      }
+      {
         name: 'NEXT_PUBLIC_API_URL'
         value: 'https://${backoffice.outputs.fqdn}'
       }

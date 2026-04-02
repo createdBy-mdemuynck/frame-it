@@ -2,16 +2,6 @@ import React, { useState, useEffect } from "react";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-// Hardcode the backend URL to ensure it always points to the correct server
-const getApiBase = () => {
-  // Always use localhost:3001 for local development
-  return "http://localhost:3001";
-};
-
-const API_BASE = getApiBase();
-
-console.log("API_BASE configured as:", API_BASE); // Debug log
-
 export default function UploadForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,6 +12,24 @@ export default function UploadForm() {
   const [submitting, setSubmitting] = useState(false);
   const [inputMode, setInputMode] = useState(null); // 'camera' or 'gallery'
   const [serverStatus, setServerStatus] = useState("checking");
+  const [apiUrl, setApiUrl] = useState("http://localhost:3001"); // Default
+
+  // Fetch runtime configuration from API
+  useEffect(() => {
+    async function fetchConfig() {
+      try {
+        const res = await fetch("/api/config");
+        if (res.ok) {
+          const config = await res.json();
+          setApiUrl(config.apiUrl);
+          console.log("API_BASE configured as:", config.apiUrl);
+        }
+      } catch (err) {
+        console.error("Failed to fetch config, using default:", err);
+      }
+    }
+    fetchConfig();
+  }, []);
 
   // Load saved name and email from localStorage on mount
   useEffect(() => {
@@ -29,10 +37,14 @@ export default function UploadForm() {
     const savedEmail = localStorage.getItem("userEmail");
     if (savedName) setName(savedName);
     if (savedEmail) setEmail(savedEmail);
-
-    // Check server connectivity
-    checkServerHealth();
   }, []);
+
+  // Check server health when apiUrl changes
+  useEffect(() => {
+    if (apiUrl) {
+      checkServerHealth();
+    }
+  }, [apiUrl]);
 
   // Save name and email to localStorage when they change
   useEffect(() => {
@@ -45,7 +57,7 @@ export default function UploadForm() {
 
   async function checkServerHealth() {
     try {
-      const res = await fetch(`${API_BASE}/health`);
+      const res = await fetch(`${apiUrl}/health`);
       if (res.ok) {
         setServerStatus("connected");
       } else {
@@ -116,9 +128,9 @@ export default function UploadForm() {
       form.append("email", email);
       form.append("photo", file);
 
-      const url = `${API_BASE}/api/upload`;
+      const url = `${apiUrl}/api/upload`;
       console.log("=== UPLOAD DEBUG ===");
-      console.log("API_BASE:", API_BASE);
+      console.log("API_BASE:", apiUrl);
       console.log("Upload URL:", url);
       console.log("Form data - name:", name, "email:", email, "file:", file?.name);
 
@@ -161,7 +173,7 @@ export default function UploadForm() {
       <h1 className="title">Send a Photo</h1>
 
       {serverStatus === "offline" && (
-        <div className="error">⚠️ Cannot connect to server at {API_BASE}. Make sure the server is running on port 3001.</div>
+        <div className="error">⚠️ Cannot connect to server at {apiUrl}. Make sure the server is running.</div>
       )}
       {serverStatus === "checking" && <div className="status">Checking server connection...</div>}
 

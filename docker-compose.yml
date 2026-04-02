@@ -37,11 +37,16 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
+      args:
+        # Use internal Docker network name for backend communication
+        NEXT_PUBLIC_API_URL: http://backoffice:3001
     container_name: frameit-frontoffice
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      # Browser requests go through the host, so use localhost
+      # Internal Next.js SSR requests use the Docker network
       - NEXT_PUBLIC_API_URL=http://localhost:3001
     networks:
       - frameit-network
