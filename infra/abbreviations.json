@@ -1,0 +1,9 @@
+{
+  "storageStorageAccounts": "st",
+  "keyVaultVaults": "kv",
+  "appContainerApps": "ca",
+  "appManagedEnvironments": "cae",
+  "containerRegistryRegistries": "cr",
+  "insightsComponents": "appi",
+  "operationalInsightsWorkspaces": "log"
+}
