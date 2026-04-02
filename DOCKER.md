@@ -4,15 +4,16 @@
 
 This application works with **both Podman and Docker**. Choose what works for you:
 
-| Feature | Podman | Docker |
-|---------|--------|--------|
-| Daemon | ❌ Daemonless | ✅ Requires daemon |
-| Root access | ❌ Rootless by default | ⚠️ Typically requires root |
-| Compatibility | ✅ Docker-compatible API | ✅ Native |
-| Desktop app | Podman Desktop | Docker Desktop |
-| Command | `podman-compose` | `docker-compose` |
+| Feature       | Podman                   | Docker                     |
+| ------------- | ------------------------ | -------------------------- |
+| Daemon        | ❌ Daemonless            | ✅ Requires daemon         |
+| Root access   | ❌ Rootless by default   | ⚠️ Typically requires root |
+| Compatibility | ✅ Docker-compatible API | ✅ Native                  |
+| Desktop app   | Podman Desktop           | Docker Desktop             |
+| Command       | `podman-compose`         | `docker-compose`           |
 
 **All commands in this guide work with both.** Just replace:
+
 - `docker-compose` → `podman-compose`
 - `docker` → `podman`
 
@@ -20,16 +21,16 @@ This application works with **both Podman and Docker**. Choose what works for yo
 
 ### Quick Command Reference
 
-| Task | Podman | Docker |
-|------|--------|--------|
-| Start production | `podman-compose up -d` | `docker-compose up -d` |
-| Start development | `podman-compose -f docker-compose.dev.yml up` | `docker-compose -f docker-compose.dev.yml up` |
-| View logs | `podman-compose logs -f` | `docker-compose logs -f` |
-| Stop containers | `podman-compose down` | `docker-compose down` |
-| Build images | `podman-compose build` | `docker-compose build` |
-| List containers | `podman ps` | `docker ps` |
-| Container stats | `podman stats` | `docker stats` |
-| Execute in container | `podman exec -it` | `docker exec -it` |
+| Task                 | Podman                                        | Docker                                        |
+| -------------------- | --------------------------------------------- | --------------------------------------------- |
+| Start production     | `podman-compose up -d`                        | `docker-compose up -d`                        |
+| Start development    | `podman-compose -f docker-compose.dev.yml up` | `docker-compose -f docker-compose.dev.yml up` |
+| View logs            | `podman-compose logs -f`                      | `docker-compose logs -f`                      |
+| Stop containers      | `podman-compose down`                         | `docker-compose down`                         |
+| Build images         | `podman-compose build`                        | `docker-compose build`                        |
+| List containers      | `podman ps`                                   | `docker ps`                                   |
+| Container stats      | `podman stats`                                | `docker stats`                                |
+| Execute in container | `podman exec -it`                             | `docker exec -it`                             |
 
 ---
 
@@ -38,12 +39,14 @@ This application works with **both Podman and Docker**. Choose what works for yo
 This application runs in two Docker containers:
 
 ### **Backoffice Container** (Server/API)
+
 - **Port**: 3001
 - **Purpose**: Express.js API, file upload handling, admin pages
 - **Image**: Node.js 20 Alpine
 - **Health Check**: `/health` endpoint
 
 ### **Frontoffice Container** (Web/UI)
+
 - **Port**: 3000
 - **Purpose**: Next.js user interface for photo uploads
 - **Image**: Node.js 20 Alpine
@@ -56,21 +59,25 @@ This application runs in two Docker containers:
 ### Production Deployment
 
 Build and start both containers:
+
 ```bash
 docker-compose up -d
 ```
 
 Check status:
+
 ```bash
 docker-compose ps
 ```
 
 View logs:
+
 ```bash
 docker-compose logs -f
 ```
 
 Stop containers:
+
 ```bash
 docker-compose down
 ```
@@ -78,6 +85,7 @@ docker-compose down
 ### Development with Hot Reload
 
 Start development environment:
+
 ```bash
 docker-compose -f docker-compose.dev.yml up
 ```
@@ -163,12 +171,12 @@ docker stats frameit-backoffice frameit-frontoffice
 
 After running `docker-compose up -d`:
 
-| Service | URL | Purpose |
-|---------|-----|---------|
-| **Frontoffice** | http://localhost:3000 | User photo upload |
-| **Backoffice** | http://localhost:3001 | Admin login and management |
-| **API** | http://localhost:3001/api/* | REST endpoints |
-| **Uploads** | http://localhost:3001/uploads/* | Uploaded photos |
+| Service         | URL                              | Purpose                    |
+| --------------- | -------------------------------- | -------------------------- |
+| **Frontoffice** | http://localhost:3000            | User photo upload          |
+| **Backoffice**  | http://localhost:3001            | Admin login and management |
+| **API**         | http://localhost:3001/api/\*     | REST endpoints             |
+| **Uploads**     | http://localhost:3001/uploads/\* | Uploaded photos            |
 
 ---
 
@@ -184,6 +192,7 @@ volumes:
 ```
 
 **Uploaded photos are stored on your host machine** at `./server/uploads/` and mapped into the container. This means:
+
 - ✅ Photos survive container restarts
 - ✅ Photos persist when recreating containers
 - ✅ You can backup by copying `./server/uploads/`
@@ -205,6 +214,7 @@ tar -xzf uploads-backup-YYYYMMDD.tar.gz
 ### Environment Variables
 
 **Backoffice** (`docker-compose.yml`):
+
 ```yaml
 environment:
   - PORT=3001
@@ -213,6 +223,7 @@ environment:
 ```
 
 **Frontoffice** (`docker-compose.yml`):
+
 ```yaml
 environment:
   - NODE_ENV=production
@@ -222,6 +233,7 @@ environment:
 ### Custom Configuration
 
 Create a `.env` file in the project root:
+
 ```env
 # Backoffice
 BACKOFFICE_PORT=3001
@@ -244,6 +256,7 @@ Both containers have built-in health checks:
 **Frontoffice**: Checks root endpoint every 30 seconds
 
 View health status:
+
 ```bash
 docker-compose ps
 ```
@@ -257,12 +270,14 @@ Healthy containers show `Up (healthy)`.
 ### Containers won't start
 
 **Check logs:**
+
 ```bash
 docker-compose logs backoffice
 docker-compose logs frontoffice
 ```
 
 **Common issues:**
+
 - Port already in use → Stop conflicting services
 - Build failed → Run `docker-compose build --no-cache`
 - Permission denied → Check file permissions on `./server/uploads/`
@@ -274,6 +289,7 @@ Containers should be accessible on `localhost`.
 
 **Linux:**
 May need to use container IP:
+
 ```bash
 docker inspect frameit-backoffice | grep IPAddress
 ```
@@ -281,6 +297,7 @@ docker inspect frameit-backoffice | grep IPAddress
 ### Uploads not persisting
 
 **Check volume mount:**
+
 ```bash
 docker inspect frameit-backoffice | grep -A 10 Mounts
 ```
@@ -291,6 +308,7 @@ Ensure `./server/uploads` exists on host and has write permissions.
 
 **Windows users:**
 Add to `docker-compose.dev.yml` frontoffice environment:
+
 ```yaml
 - WATCHPACK_POLLING=true
 ```
@@ -300,6 +318,7 @@ Already configured ✅
 ### Out of disk space
 
 **Clean up Docker:**
+
 ```bash
 # Remove unused images
 docker image prune -a
@@ -321,11 +340,13 @@ docker system prune -a --volumes
 ### Update Application Code
 
 1. **Pull latest code:**
+
    ```bash
    git pull
    ```
 
 2. **Rebuild containers:**
+
    ```bash
    docker-compose build
    ```
@@ -350,18 +371,21 @@ docker-compose up -d
 ## 🧪 Testing Container Setup
 
 ### 1. Health Check
+
 ```bash
 curl http://localhost:3001/health
 # Should return: {"status":"ok"}
 ```
 
 ### 2. Upload Test
+
 1. Visit http://localhost:3000
 2. Fill in name and email
 3. Upload a photo
 4. Check if file appears in `./server/uploads/`
 
 ### 3. Admin Test
+
 1. Visit http://localhost:3001
 2. Login with any email
 3. View gallery and leaderboard
@@ -375,6 +399,7 @@ curl http://localhost:3001/health
 If you encounter permission errors on systems with SELinux (Fedora, RHEL, CentOS):
 
 **Add `:z` flag to volume mounts:**
+
 ```yaml
 # In docker-compose.yml
 volumes:
@@ -388,6 +413,7 @@ The `:z` flag relabels the volume for container access.
 Podman runs rootless by default, which is more secure but can cause permission issues:
 
 **If uploads fail with permission errors:**
+
 ```bash
 # Check directory permissions
 ls -la server/uploads/
@@ -400,6 +426,7 @@ chmod -R 755 server/uploads/
 ### Podman Desktop
 
 [Podman Desktop](https://podman-desktop.io/) provides a Docker Desktop-like GUI:
+
 - Visual container management
 - Compatible with `docker-compose.yml` files
 - Cross-platform (Windows, Mac, Linux)
@@ -410,12 +437,14 @@ chmod -R 755 server/uploads/
 For 100% Docker command compatibility:
 
 **Linux/Mac (.bashrc or .zshrc):**
+
 ```bash
 alias docker='podman'
 alias docker-compose='podman-compose'
 ```
 
 **Windows PowerShell ($PROFILE):**
+
 ```powershell
 Function docker { podman $args }
 Function docker-compose { podman-compose $args }
@@ -445,6 +474,7 @@ podman machine list
 ### Security
 
 1. **Change session secret:**
+
    ```yaml
    - SESSION_SECRET=use-a-strong-random-secret-here
    ```
@@ -461,6 +491,7 @@ podman machine list
 ### Performance
 
 1. **Use Docker BuildKit:**
+
    ```bash
    DOCKER_BUILDKIT=1 docker-compose build
    ```
@@ -471,13 +502,14 @@ podman machine list
    deploy:
      resources:
        limits:
-         cpus: '1'
+         cpus: "1"
          memory: 512M
    ```
 
 ### Monitoring
 
 1. **View logs with timestamps:**
+
    ```bash
    docker-compose logs -f --timestamps
    ```
@@ -492,6 +524,7 @@ podman machine list
 ## 🎯 Common Scenarios
 
 ### Scenario 1: Fresh Start
+
 ```bash
 docker-compose down -v  # Remove everything
 docker-compose build    # Rebuild
@@ -499,17 +532,20 @@ docker-compose up -d    # Start
 ```
 
 ### Scenario 2: Code Changes (Production)
+
 ```bash
 docker-compose build backoffice  # Rebuild changed service
 docker-compose up -d backoffice  # Restart service
 ```
 
 ### Scenario 3: Development
+
 ```bash
 docker-compose -f docker-compose.dev.yml up  # Auto-reload on changes
 ```
 
 ### Scenario 4: View All Activity
+
 ```bash
 docker-compose logs -f --tail=100  # Last 100 lines, follow
 ```
@@ -519,6 +555,7 @@ docker-compose logs -f --tail=100  # Last 100 lines, follow
 ## 📞 Support
 
 For issues:
+
 1. Check logs: `docker-compose logs`
 2. Check health: `docker-compose ps`
 3. Review [TROUBLESHOOTING.md](TROUBLESHOOTING.md)

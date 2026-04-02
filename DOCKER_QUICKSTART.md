@@ -5,22 +5,26 @@
 **Choose one:**
 
 ### Option A: Podman (Rootless, Daemonless)
+
 - Windows: [Podman Desktop](https://podman-desktop.io/) or Podman CLI
 - Mac: `brew install podman podman-compose`
 - Linux: `sudo apt install podman podman-compose` (or your package manager)
 
 **Verify Podman:**
+
 ```bash
 podman --version
 podman-compose --version
 ```
 
 ### Option B: Docker
+
 - Windows: Docker Desktop for Windows
 - Mac: Docker Desktop for Mac
 - Linux: Docker Engine + Docker Compose
 
 **Verify Docker:**
+
 ```bash
 docker --version
 docker-compose --version
@@ -37,16 +41,19 @@ docker-compose --version
 From the project root:
 
 **Podman:**
+
 ```bash
 podman-compose up -d
 ```
 
 **Docker:**
+
 ```bash
 docker-compose up -d
 ```
 
 This command:
+
 - ✅ Builds both containers (backoffice + frontoffice)
 - ✅ Creates a network between them
 - ✅ Starts containers in background
@@ -55,6 +62,7 @@ This command:
 ### 2. Verify Running
 
 **Podman:**
+
 ```bash
 podman-compose ps
 # or
@@ -62,11 +70,13 @@ podman ps
 ```
 
 **Docker:**
+
 ```bash
 docker-compose ps
 ```
 
 Should see:
+
 ```
 NAME                      STATUS          PORTS
 frameit-backoffice        Up (healthy)    0.0.0.0:3001->3001/tcp
@@ -75,14 +85,15 @@ frameit-frontoffice       Up (healthy)    0.0.0.0:3000->3000/tcp
 
 ### 3. Access the App
 
-| What | URL |
-|------|-----|
+| What              | URL                   |
+| ----------------- | --------------------- |
 | **Upload photos** | http://localhost:3000 |
-| **Admin panel** | http://localhost:3001 |
+| **Admin panel**   | http://localhost:3001 |
 
 ### 4. View Logs
 
 **Podman:**
+
 ```bash
 podman-compose logs -f              # All logs
 podman-compose logs -f backoffice   # Just backoffice
@@ -90,6 +101,7 @@ podman-compose logs -f frontoffice  # Just frontoffice
 ```
 
 **Docker:**
+
 ```bash
 docker-compose logs -f              # All logs
 docker-compose logs -f backoffice   # Just backoffice
@@ -99,12 +111,14 @@ docker-compose logs -f frontoffice  # Just frontoffice
 ### 5. Stop
 
 **Podman:**
+
 ```bash
 podman-compose stop  # Stop (keeps data)
 podman-compose down  # Stop and remove containers (data persists)
 ```
 
 **Docker:**
+
 ```bash
 docker-compose stop  # Stop (keeps data)
 docker-compose down  # Stop and remove containers (data persists)
@@ -117,11 +131,13 @@ docker-compose down  # Stop and remove containers (data persists)
 ### 1. Start Development Environment
 
 **Podman:**
+
 ```bash
 podman-compose -f docker-compose.dev.yml up
 ```
 
 **Docker:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml up
 ```
@@ -131,6 +147,7 @@ docker-compose -f docker-compose.dev.yml up
 ### 2. Make Changes
 
 Edit files in:
+
 - `./server/` → Backoffice auto-reloads (nodemon)
 - `./web/` → Frontoffice auto-reloads (Next.js dev)
 
@@ -139,6 +156,7 @@ Changes apply instantly!
 ### 3. Stop Development
 
 Press `Ctrl+C` in the terminal, then:
+
 ```bash
 docker-compose -f docker-compose.dev.yml down
 ```
@@ -169,12 +187,14 @@ docker-compose -f docker-compose.dev.yml down
 ### Rebuild After Code Changes (Production)
 
 **Podman:**
+
 ```bash
 podman-compose build
 podman-compose up -d
 ```
 
 **Docker:**
+
 ```bash
 docker-compose build
 docker-compose up -d
@@ -183,11 +203,13 @@ docker-compose up -d
 ### View Container Resource Usage
 
 **Podman:**
+
 ```bash
 podman stats frameit-backoffice frameit-frontoffice
 ```
 
 **Docker:**
+
 ```bash
 docker stats frameit-backoffice frameit-frontoffice
 ```
@@ -195,6 +217,7 @@ docker stats frameit-backoffice frameit-frontoffice
 ### Clean Restart
 
 **Podman:**
+
 ```bash
 podman-compose down
 podman-compose build --no-cache
@@ -202,6 +225,7 @@ podman-compose up -d
 ```
 
 **Docker:**
+
 ```bash
 docker-compose down
 docker-compose build --no-cache
@@ -211,11 +235,13 @@ docker-compose up -d
 ### Delete Everything (including uploads!)
 
 **Podman:**
+
 ```bash
 podman-compose down -v
 ```
 
 **Docker:**
+
 ```bash
 docker-compose down -v
 ```
@@ -231,6 +257,7 @@ docker-compose down -v
 **Problem:** Another service is using port 3000 or 3001.
 
 **Solution:**
+
 ```bash
 # Windows PowerShell
 Get-Process -Id (Get-NetTCPConnection -LocalPort 3000,3001).OwningProcess
@@ -249,16 +276,19 @@ lsof -i :3001
 **Solution:**
 
 **Podman:**
+
 ```bash
 podman-compose logs backoffice
 ```
 
 **Docker:**
+
 ```bash
 docker-compose logs backoffice
 ```
 
 **Common fixes:**
+
 1. Wait longer (health checks take 10-15 seconds on first start)
 2. Rebuild: `podman-compose build --no-cache` or `docker-compose build --no-cache`
 3. Check .env files exist
@@ -272,11 +302,13 @@ Should work on `localhost` by default.
 May need container IP:
 
 **Podman:**
+
 ```bash
 podman inspect frameit-frontoffice | grep IPAddress
 ```
 
 **Docker:**
+
 ```bash
 docker inspect frameit-frontoffice | grep IPAddress
 ```
@@ -286,6 +318,7 @@ docker inspect frameit-frontoffice | grep IPAddress
 **Solution:** Already fixed! `WATCHPACK_POLLING=true` is set in `docker-compose.dev.yml`.
 
 If still not working:
+
 1. Make sure you're using `docker-compose.dev.yml`
 2. Restart containers
 3. Try editing a file and saving — changes should appear in ~2-5 seconds
@@ -314,12 +347,14 @@ Before deploying to production:
 Make Podman commands identical to Docker:
 
 **Linux/Mac (.bashrc or .zshrc):**
+
 ```bash
 alias docker=podman
 alias docker-compose=podman-compose
 ```
 
 **Windows (PowerShell profile):**
+
 ```powershell
 Set-Alias -Name docker -Value podman
 Set-Alias -Name docker-compose -Value podman-compose
@@ -330,6 +365,7 @@ Then use regular `docker-compose` commands!
 ### Rootless Containers
 
 Podman runs rootless by default - no sudo needed:
+
 ```bash
 podman-compose up -d  # No sudo required!
 ```
@@ -337,6 +373,7 @@ podman-compose up -d  # No sudo required!
 ### Podman Desktop
 
 If you prefer a GUI, install [Podman Desktop](https://podman-desktop.io/):
+
 - Visual container management
 - Compatible with Docker Compose files
 - Works on Windows, Mac, and Linux
@@ -344,6 +381,7 @@ If you prefer a GUI, install [Podman Desktop](https://podman-desktop.io/):
 ### SELinux Issues (Linux)
 
 If you get permission errors on Linux with SELinux:
+
 ```bash
 # Add :z flag to volumes in docker-compose.yml
 volumes:

@@ -1,5 +1,5 @@
 # Development docker-compose with hot reload
-version: '3.8'
+version: "3.8"
 
 services:
   # Backoffice (Server/API) - Development

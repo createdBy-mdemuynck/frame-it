@@ -130,23 +130,19 @@ const uploadHandler = async (req, res) => {
     setImmediate(async () => {
       try {
         // Give filesystem extra time to sync after volume mount
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         console.log(`📸 Background: Processing thumbnail for ${finalPath}`);
-        
-        await sharp(finalPath)
-          .resize(150, 150, { fit: 'cover' })
-          .toFile(thumbnailPath);
-        
+
+        await sharp(finalPath).resize(150, 150, { fit: "cover" }).toFile(thumbnailPath);
+
         console.log(`✅ Background: Thumbnail generated ${thumbnailPath}`);
       } catch (thumbError) {
         console.error(`❌ Background: Thumbnail generation failed for ${finalPath}:`, thumbError.message);
         // Try again after a longer delay
         setTimeout(async () => {
           try {
-            await sharp(finalPath)
-              .resize(150, 150, { fit: 'cover' })
-              .toFile(thumbnailPath);
+            await sharp(finalPath).resize(150, 150, { fit: "cover" }).toFile(thumbnailPath);
             console.log(`✅ Background retry: Thumbnail generated ${thumbnailPath}`);
           } catch (retryError) {
             console.error(`❌ Background retry also failed for ${finalPath}:`, retryError.message);
@@ -154,7 +150,6 @@ const uploadHandler = async (req, res) => {
         }, 2000);
       }
     });
-
   } catch (error) {
     console.error("Error handling upload:", error);
     res.status(500).json({ success: false, error: "Internal server error" });

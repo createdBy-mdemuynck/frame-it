@@ -18,16 +18,19 @@ The backoffice container has been rebuilt with **libvips** and Sharp dependencie
 ## 📋 Quick Reference
 
 ### View Running Containers
+
 ```bash
 podman ps
 ```
 
 ### View All Containers (including stopped)
+
 ```bash
 podman ps -a
 ```
 
 ### View Logs
+
 ```bash
 # Backoffice logs
 podman logs frameit-backoffice
@@ -39,6 +42,7 @@ podman logs -f frameit-frontoffice  # Follow (live)
 ```
 
 ### Stop Containers
+
 ```bash
 # Stop one
 podman stop frameit-backoffice
@@ -49,6 +53,7 @@ podman stop frameit-backoffice frameit-frontoffice
 ```
 
 ### Start Containers (if stopped)
+
 ```bash
 # Start one
 podman start frameit-backoffice
@@ -59,6 +64,7 @@ podman start frameit-backoffice frameit-frontoffice
 ```
 
 ### Restart Containers
+
 ```bash
 # Restart one
 podman restart frameit-backoffice
@@ -69,6 +75,7 @@ podman restart frameit-backoffice frameit-frontoffice
 ```
 
 ### Remove Containers (must be stopped first)
+
 ```bash
 # Remove one
 podman rm frameit-backoffice
@@ -87,18 +94,21 @@ podman rm -f frameit-backoffice frameit-frontoffice
 ### After Code Changes
 
 **1. Stop and remove old containers:**
+
 ```bash
 podman stop frameit-backoffice frameit-frontoffice
 podman rm frameit-backoffice frameit-frontoffice
 ```
 
 **2. Rebuild images:**
+
 ```bash
 podman build -t frameit-backoffice:latest -f server/Dockerfile server
 podman build -t frameit-frontoffice:latest -f web/Dockerfile web
 ```
 
 **3. Start new containers:**
+
 ```bash
 # Backoffice
 podman run -d --name frameit-backoffice --network frameit-network -p 3001:3001 -e PORT=3001 -e NODE_ENV=production -e SESSION_SECRET=frameit-production-secret-change-me -v "${PWD}/server/uploads:/app/uploads:z" frameit-backoffice:latest
@@ -112,6 +122,7 @@ podman run -d --name frameit-frontoffice --network frameit-network -p 3000:3000 
 ## 🧹 Complete Cleanup
 
 ### Remove Everything
+
 ```bash
 # Stop and remove containers
 podman stop frameit-backoffice frameit-frontoffice
@@ -132,27 +143,32 @@ podman system prune -a
 ## 🐛 Troubleshooting
 
 ### Check Container Status
+
 ```bash
 podman ps -a
 ```
 
 Look for STATUS column:
+
 - `Up X seconds` = Running ✅
 - `Exited (0)` = Stopped normally
 - `Exited (1)` = Crashed ❌
 
 ### Inspect Container
+
 ```bash
 podman inspect frameit-backoffice
 podman inspect frameit-frontoffice
 ```
 
 ### View Resource Usage
+
 ```bash
 podman stats frameit-backoffice frameit-frontoffice
 ```
 
 ### Execute Commands Inside Container
+
 ```bash
 # Get a shell in the container
 podman exec -it frameit-backoffice sh
@@ -162,6 +178,7 @@ podman exec frameit-backoffice ls -la /app/uploads
 ```
 
 ### Check Network
+
 ```bash
 # List networks
 podman network ls
@@ -191,11 +208,13 @@ This will scan all uploaded photos and create any missing thumbnails.
 For development with hot reload, you can mount your source code:
 
 ### Backoffice (Dev)
+
 ```bash
 podman run -d --name frameit-backoffice-dev --network frameit-network -p 3001:3001 -e PORT=3001 -e NODE_ENV=development -e SESSION_SECRET=frameit-dev-secret -v "${PWD}/server:/app:z" -v "/app/node_modules" frameit-backoffice:latest npm run dev
 ```
 
 ### Frontoffice (Dev)
+
 ```bash
 podman run -d --name frameit-frontoffice-dev --network frameit-network -p 3000:3000 -e NODE_ENV=development -e NEXT_PUBLIC_API_URL=http://localhost:3001 -v "${PWD}/web:/app:z" -v "/app/node_modules" -v "/app/.next" frameit-frontoffice:latest npm run dev
 ```
@@ -205,6 +224,7 @@ podman run -d --name frameit-frontoffice-dev --network frameit-network -p 3000:3
 ## 💡 Tips
 
 ### Create Aliases (PowerShell)
+
 Add to your PowerShell profile (`$PROFILE`):
 
 ```powershell
@@ -235,6 +255,7 @@ Function Restart-FrameIt {
 ```
 
 Then use:
+
 ```powershell
 Stop-FrameIt
 Start-FrameIt

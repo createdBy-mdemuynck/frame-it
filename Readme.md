@@ -7,6 +7,7 @@ A full-stack photo voting application with frontoffice (user upload) and backoff
 ### Option 1: Docker/Podman (Recommended)
 
 **With docker-compose or podman-compose:**
+
 ```bash
 # Podman (if podman-compose is installed):
 podman-compose up -d
@@ -16,6 +17,7 @@ docker-compose up -d
 ```
 
 **With Podman (manual - podman-compose not required):**
+
 ```bash
 # Build images
 podman build -t frameit-backoffice:latest -f server/Dockerfile server
@@ -31,6 +33,7 @@ podman run -d --name frameit-frontoffice --network frameit-network -p 3000:3000 
 ```
 
 **Development (with hot reload):**
+
 ```bash
 # Podman:
 podman-compose -f docker-compose.dev.yml up
@@ -84,6 +87,7 @@ Continue to [Installation & Setup](#installation--setup) below.
 ### Option A: Container Setup (Recommended)
 
 **1. Production Deployment:**
+
 ```bash
 # Podman:
 podman-compose up -d
@@ -93,6 +97,7 @@ docker-compose up -d
 ```
 
 **2. Development with Hot Reload:**
+
 ```bash
 # Podman:
 podman-compose -f docker-compose.dev.yml up
@@ -102,6 +107,7 @@ docker-compose -f docker-compose.dev.yml up
 ```
 
 Access:
+
 - Frontoffice: http://localhost:3000
 - Backoffice: http://localhost:3001
 
@@ -128,12 +134,14 @@ npm install
 **3. Create Environment Files**
 
 **server/.env:**
+
 ```env
 PORT=3001
 SESSION_SECRET=frame-it-secret-key-change-in-production
 ```
 
 **web/.env.local:**
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
@@ -150,6 +158,7 @@ Server runs on: **http://localhost:3001**
 **5. Start the Web App (Frontoffice)**
 
 In a new terminal:
+
 ```bash
 cd web
 npm run dev
