@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard - Frame It Admin</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f5f5f5;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .header {
+      background: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #333;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .email {
+      font-size: 14px;
+      color: #666;
+    }
+    .nav-link {
+      color: #007bff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .nav-link:hover {
+      text-decoration: underline;
+    }
+    .logout-btn {
+      padding: 8px 16px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
+    .delete-all-btn {
+      padding: 8px 16px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .delete-all-btn:hover {
+      background-color: #ff5252;
+    }
+    .delete-photo-btn {
+      padding: 6px 12px;
+      margin-left: 10px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .delete-photo-btn:hover {
+      background-color: #ff5252;
+    }
+    .list {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .rank {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+      padding: 20px;
+      min-width: 80px;
+      text-align: center;
+    }
+    .rank.gold { color: #ffd700; }
+    .rank.silver { color: #c0c0c0; }
+    .rank.bronze { color: #cd7f32; }
+    .card img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+    }
+    .card-content {
+      flex: 1;
+      padding: 16px;
+    }
+    .stars {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffc107;
+      margin-bottom: 8px;
+    }
+    .metadata {
+      margin-top: 12px;
+      padding: 12px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .metadata h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    .metadata p {
+      margin: 4px 0;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      color: #666;
+    }
+    .error {
+      padding: 12px;
+      background-color: #fee;
+      border: 1px solid #fcc;
+      border-radius: 4px;
+      color: #c00;
+      margin-bottom: 16px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal.show {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 90%;
+      max-height: 90%;
+      overflow: auto;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background-color: #dc3545;
+      color: white;
+      font-size: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 1;
+    }
+    .modal-image {
+      max-width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+    .modal-metadata {
+      margin-top: 20px;
+      padding: 16px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+    const isSuperAdmin = <%= isSuperAdmin ? 'true' : 'false' %>;
+<body>
+  <div class="header">
+    <h1>Leaderboard</h1>
+    <div class="header-right">
+      <span class="email"><%= adminEmail %></span>
+      <% if (isSuperAdmin) { %>
+        <button class="delete-all-btn" onclick="deleteAllData()">🗑️ Delete All Data</button>
+      <% } %>
+      <a href="/gallery" class="nav-link">Gallery</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div id="error" class="error" style="display:none;"></div>
+  <div id="leaderboard" class="loading">Loading leaderboard...</div>
+
+  <div id="modal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="closeModal()">×</button>
+      <img id="modal-image" class="modal-image" src="" alt="Full size">
+      <div id="modal-metadata" class="modal-metadata"></div>
+    </div>
+  </div>
+
+  <script>
+    let photos = [];
+    let expandedIndex = null;
+    const isSuperAdmin = <%= isSuperAdmin ? 'true' : 'false' %>;
+
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch('/api/leaderboard');
+        const data = await res.json();
+        
+        if (data.success) {
+          photos = data.photos;
+          renderLeaderboard();
+        } else {
+          showError(data.error || 'Failed to load leaderboard');
+        }
+      } catch (err) {
+        showError('Network error: ' + err.message);
+      }
+    }
+
+    function getRankClass(index) {
+      if (index === 0) return 'gold';
+      if (index === 1) return 'silver';
+      if (index === 2) return 'bronze';
+      return '';
+    }
+
+    function toggleMetadata(index) {
+      expandedIndex = expandedIndex === index ? null : index;
+      renderLeaderboard();
+    }
+
+    function showModal(photo) {
+      document.getElementById('modal-image').src = photo.photoPath;
+      
+      let metadataHtml = '<h2>Photo Details</h2>';
+      if (photo.metadata) {
+        if (photo.metadata.name) metadataHtml += `<p><strong>Name:</strong> ${photo.metadata.name}</p>`;
+        if (photo.metadata.email) metadataHtml += `<p><strong>Email:</strong> ${photo.metadata.email}</p>`;
+        if (photo.metadata.uploadedAt) {
+          metadataHtml += `<p><strong>Uploaded:</strong> ${new Date(photo.metadata.uploadedAt).toLocaleString()}</p>`;
+        }
+      }
+      metadataHtml += `<p><strong>Stars:</strong> ⭐ ${photo.starCount}</p>`;
+      
+      document.getElementById('modal-metadata').innerHTML = metadataHtml;
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+    }
+
+    function renderLeaderboard() {
+      const leaderboard = document.getElementById('leaderboard');
+      
+      if (photos.length === 0) {
+        leaderboard.innerHTML = '<p class="loading">No starred photos yet.</p>';
+        return;
+      }
+      
+      leaderboard.className = 'list';
+      leaderboard.innerHTML = photos.map((photo, index) => {
+        let metadataHtml = '';
+        if (expandedIndex === index && photo.metadata) {
+          metadataHtml = `
+            <div class="metadata">
+              <h3>Photo Details</h3>
+              ${photo.metadata.name ? `<p><strong>Name:</strong> ${photo.metadata.name}</p>` : ''}
+              ${photo.metadata.email ? `<p><strong>Email:</strong> ${photo.metadata.email}</p>` : ''}
+              ${photo.metadata.uploadedAt ? `<p><strong>Uploaded:</strong> ${new Date(photo.metadata.uploadedAt).toLocaleString()}</p>` : ''}
+            </div>
+          `;
+        }
+        
+        return `
+          <div class="card" onclick="toggleMetadata(${index})">
+            <div class="rank ${getRankClass(index)}">#${index + 1}</div>
+            <img src="${photo.photoPath}" alt="Photo" onclick="event.stopPropagation(); showModal(${JSON.stringify(photo).replace(/"/g, '&quot;')})">
+            <div class="card-content">
+              <div class="stars">
+                ⭐ ${photo.starCount} ${photo.starCount === 1 ? 'star' : 'stars'}
+                ${isSuperAdmin ? `
+                  <button class="delete-photo-btn" onclick="event.stopPropagation(); deletePhoto(${index}, '${photo.photoPath}')">
+                    🗑️ Delete
+                  </button>
+                ` : ''}
+              </div>
+              ${metadataHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function logout() {
+      try {
+        await fetch('/api/admin/logout', { method: 'POST' });
+        localStorage.removeItem('adminEmail');
+        window.location.href = '/';
+      } catch (err) {
+        console.error('Logout failed:', err);
+      }
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    async function deletePhoto(index, photoPath) {
+      if (!confirm(`Are you sure you want to delete this photo?\n\nThis action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/photo', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photoPath }),
+          credentials: 'include'
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert('Photo deleted successfully');
+          loadLeaderboard(); // Reload leaderboard
+        } else {
+          alert(data.error || 'Failed to delete photo');
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    async function deleteAllData() {
+      const confirmation = prompt(
+        'WARNING: This will delete ALL photos and data permanently!\n\n' +
+        'Type "DELETE ALL" to confirm:'
+      );
+
+      if (confirmation !== 'DELETE ALL') {
+        if (confirmation !== null) {
+          alert('Deletion cancelled. You must type "DELETE ALL" exactly.');
+        }
+        return;
+      }
+
+      const finalConfirm = confirm(
+        'FINAL CONFIRMATION\n\n' +
+        'Are you absolutely sure you want to delete ALL data?\n\n' +
+        'This action CANNOT be undone!'
+      );
+
+      if (!finalConfirm) {
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/all-data', {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert(`All data deleted successfully!\n\nDeleted: ${data.deletedFolders} folders, ${data.deletedFiles} files`);
+          loadLeaderboard(); // Reload leaderboard (will be empty)
+        } else {
+          alert(data.error || 'Failed to delete all data');
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    loadLeaderboard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery - Frame It Admin</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f5f5f5;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .header {
+      background: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #333;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .email {
+      font-size: 14px;
+      color: #666;
+    }
+    .nav-link {
+      color: #007bff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .nav-link:hover {
+      text-decoration: underline;
+    }
+    .logout-btn {
+      padding: 8px 16px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
+    .delete-all-btn {
+      padding: 8px 16px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .delete-all-btn:hover {
+      background-color: #ff5252;
+    }
+    .delete-photo-btn {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .delete-photo-btn:hover {
+      background-color: #ff5252;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .card-footer {
+      padding: 12px;
+    }
+    .star-btn {
+      width: 100%;
+      padding: 8px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .star-btn:hover {
+      background-color: #e9ecef;
+    }
+    .star-btn.starred {
+      background-color: #ffc107;
+      border-color: #ffc107;
+      color: #000;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      color: #666;
+    }
+    .error {
+      padding: 12px;
+      background-color: #fee;
+      border: 1px solid #fcc;
+      border-radius: 4px;
+      color: #c00;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Gallery</h1>
+    <div class="header-right">
+      <span class="email"><%= adminEmail %></span>
+      <% if (isSuperAdmin) { %>
+        <button class="delete-all-btn" onclick="deleteAllData()">🗑️ Delete All Data</button>
+      <% } %>
+      <a href="/leaderboard" class="nav-link">Leaderboard</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div id="error" class="error" style="display:none;"></div>
+  <div id="gallery" class="loading">Loading gallery...</div>
+
+  <script>
+    let photos = [];
+    const isSuperAdmin = <%= isSuperAdmin ? 'true' : 'false' %>;
+
+    async function loadGallery() {
+      try {
+        const res = await fetch('/api/gallery');
+        const data = await res.json();
+        
+        if (data.success) {
+          photos = data.photos;
+          renderGallery();
+        } else {
+          showError(data.error || 'Failed to load gallery');
+        }
+      } catch (err) {
+        showError('Network error: ' + err.message);
+      }
+    }
+
+    function renderGallery() {
+      const gallery = document.getElementById('gallery');
+      
+      if (photos.length === 0) {
+        gallery.innerHTML = '<p class="loading">No photos uploaded yet.</p>';
+        return;
+      }
+      
+      gallery.className = 'grid';
+      gallery.innerHTML = photos.map((photo, index) => `
+        <div class="card">
+          <img src="${photo.thumbnailPath}" alt="Photo">
+          <div class="card-footer">
+            <button 
+              class="star-btn ${photo.starred ? 'starred' : ''}" 
+              onclick="toggleStar(${index}, '${photo.photoPath}', ${photo.starred})"
+              id="star-${index}"
+            >
+              ⭐ ${photo.starCount}
+            ${isSuperAdmin ? `
+              <button 
+                class="delete-photo-btn" 
+                onclick="deletePhoto(${index}, '${photo.photoPath}')"
+              >
+                🗑️ Delete
+              </button>
+            ` : ''}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function toggleStar(index, photoPath, isStarred) {
+      const endpoint = isStarred ? '/api/admin/unstar' : '/api/admin/star';
+      
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photoPath })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          photos[index].starCount = data.count;
+          photos[index].starred = data.starred;
+          renderGallery();
+        } else {
+          alert(data.error || 'Failed to update star');
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    async function logout() {
+      try {
+        await fetch('/api/admin/logout', { method: 'POST' });
+        localStorage.removeItem('adminEmail');
+        window.location.href = '/';
+      } catch (err) {
+        console.error('Logout failed:', err);
+      }
+    }
+
+    async function deletePhoto(index, photoPath) {
+      if (!confirm(`Are you sure you want to delete this photo?\n\nThis action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/photo', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photoPath }),
+          credentials: 'include'
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert('Photo deleted successfully');
+          loadGallery(); // Reload gallery
+        } else {
+          alert(data.error || 'Failed to delete photo');
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    async function deleteAllData() {
+      const confirmation = prompt(
+        'WARNING: This will delete ALL photos and data permanently!\n\n' +
+        'Type "DELETE ALL" to confirm:'
+      );
+
+      if (confirmation !== 'DELETE ALL') {
+        if (confirmation !== null) {
+          alert('Deletion cancelled. You must type "DELETE ALL" exactly.');
+        }
+        return;
+      }
+
+      const finalConfirm = confirm(
+        'FINAL CONFIRMATION\n\n' +
+        'Are you absolutely sure you want to delete ALL data?\n\n' +
+        'This action CANNOT be undone!'
+      );
+
+      if (!finalConfirm) {
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/all-data', {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert(`All data deleted successfully!\n\nDeleted: ${data.deletedFolders} folders, ${data.deletedFiles} files`);
+          loadGallery(); // Reload gallery (will be empty)
+        } else {
+          alert(data.error || 'Failed to delete all data');
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    loadGallery();
+  </script>
+</body>
+</html>
