@@ -7,6 +7,8 @@ Seeded at team creation.
 
 ## Learnings
 
+- Implemented admin star feature (server/index.js, HTML endpoints under /admin/). All admin star/unstar, star counts, and most-starred photo are available as HTML for browser-based admin use. Data stored in server/uploads/.stars.json. API contract in server/admin-star-api.md. Coordinated with Astra for integration.
+
 - Implemented upload API (server/index.js) using Express + multer. Added server-side validation for required name, email, and photo; rejected files >5MB and non-image uploads.
 - Storage: local uploads kept under server/uploads/ with per-email folders (email hashed with sha256). TODOs added to migrate to cloud storage (S3/GCS), add virus scanning, encryption at rest, backups, and retention policies.
 - Files created/updated in this change:

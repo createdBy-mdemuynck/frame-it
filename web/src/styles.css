@@ -35,6 +35,31 @@ body{
   font-size:1rem;
 }
 .file-field .hint{font-size:0.85rem;color:var(--muted)}
+.input-mode-buttons{
+  display:flex;
+  gap:8px;
+  margin-bottom:8px;
+}
+.mode-button{
+  flex:1;
+  padding:10px 16px;
+  border:2px solid #ddd;
+  border-radius:8px;
+  background:white;
+  font-size:0.95rem;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+.mode-button:hover{
+  border-color:#bbb;
+  background:#f9f9f9;
+}
+.mode-button.active{
+  border-color:var(--accent);
+  background:rgba(11,116,222,0.08);
+  color:var(--accent);
+  font-weight:600;
+}
 .preview img{width:100%;height:auto;border-radius:8px;border:1px solid #eee}
 .error{color:var(--error);background:rgba(194,34,34,0.06);padding:8px;border-radius:6px}
 .status{color:green;background:rgba(0,128,0,0.06);padding:8px;border-radius:6px}

@@ -4,19 +4,19 @@ FROM node:current-alpine3.23 as builder
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
+# Set production environment
+ENV NODE_ENV=production
+
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-
-# Install dependencies
-RUN npm install
+# Install dependencies (npm ci is faster and more reliable than npm install)
+RUN npm ci --ignore-scripts
 
 # Copy the rest of the application code
 COPY . .
 
-# Fix permissions for node_modules/.bin (helps on Windows hosts)
-RUN chmod -R 755 node_modules/.bin
-
+# Build the application
 RUN npm run build
 
 # Use a lightweight web server for serving static files
