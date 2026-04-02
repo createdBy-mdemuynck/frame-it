@@ -200,24 +200,24 @@ module.exports = (uploadsRoot) => {
   router.delete("/admin/photo", requireSuperAdmin, (req, res) => {
     try {
       const { photoPath } = req.body;
-      
+
       if (!photoPath) {
         return res.status(400).json({ success: false, error: "Missing photoPath" });
       }
 
       // Parse the photo path to get file system path
       // photoPath format: /uploads/email/filename.ext
-      const pathParts = photoPath.split('/').filter(p => p);
-      if (pathParts.length < 3 || pathParts[0] !== 'uploads') {
+      const pathParts = photoPath.split("/").filter((p) => p);
+      if (pathParts.length < 3 || pathParts[0] !== "uploads") {
         return res.status(400).json({ success: false, error: "Invalid photoPath format" });
       }
 
       const email = pathParts[1];
-      const filename = pathParts.slice(2).join('/');
-      
+      const filename = pathParts.slice(2).join("/");
+
       const userDir = path.join(uploadsRoot, email);
       const photoFilePath = path.join(userDir, filename);
-      const thumbnailPath = path.join(userDir, 'thumbnails', filename);
+      const thumbnailPath = path.join(userDir, "thumbnails", filename);
       const metadataPath = path.join(userDir, `${filename}.json`);
 
       let deletedFiles = [];
@@ -225,19 +225,19 @@ module.exports = (uploadsRoot) => {
       // Delete main photo
       if (fs.existsSync(photoFilePath)) {
         fs.unlinkSync(photoFilePath);
-        deletedFiles.push('photo');
+        deletedFiles.push("photo");
       }
 
       // Delete thumbnail
       if (fs.existsSync(thumbnailPath)) {
         fs.unlinkSync(thumbnailPath);
-        deletedFiles.push('thumbnail');
+        deletedFiles.push("thumbnail");
       }
 
       // Delete metadata
       if (fs.existsSync(metadataPath)) {
         fs.unlinkSync(metadataPath);
-        deletedFiles.push('metadata');
+        deletedFiles.push("metadata");
       }
 
       // Remove from stars
@@ -245,15 +245,15 @@ module.exports = (uploadsRoot) => {
       if (stars[photoPath]) {
         delete stars[photoPath];
         saveStars(uploadsRoot, stars);
-        deletedFiles.push('star data');
+        deletedFiles.push("star data");
       }
 
-      console.log(`✅ Deleted photo: ${photoPath} (${deletedFiles.join(', ')})`);
+      console.log(`✅ Deleted photo: ${photoPath} (${deletedFiles.join(", ")})`);
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: `Photo deleted successfully`,
-        deletedFiles 
+        deletedFiles,
       });
     } catch (error) {
       console.error("Error deleting photo:", error);
@@ -275,15 +275,15 @@ module.exports = (uploadsRoot) => {
       // Delete each user folder
       folders.forEach((folder) => {
         const userDir = path.join(uploadsRoot, folder.name);
-        
+
         // Count files before deleting
         const files = fs.readdirSync(userDir, { withFileTypes: true });
         deletedCount += files.length;
-        
+
         // Delete the entire folder
         fs.rmSync(userDir, { recursive: true, force: true });
         deletedFolders++;
-        
+
         console.log(`✅ Deleted folder: ${folder.name}`);
       });
 
@@ -296,11 +296,11 @@ module.exports = (uploadsRoot) => {
 
       console.log(`🗑️  All data deleted: ${deletedFolders} folders, ~${deletedCount} files`);
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: `All data deleted successfully`,
         deletedFolders,
-        deletedFiles: deletedCount
+        deletedFiles: deletedCount,
       });
     } catch (error) {
       console.error("Error deleting all data:", error);

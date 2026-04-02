@@ -39,21 +39,19 @@ module.exports = (uploadsRoot) => {
     if (!photoPath || !userId) {
       return res.send(`<p>Error: Missing photoPath or userId</p>`);
     }
-    
+
     const stars = loadStars(uploadsRoot);
     if (!stars[photoPath]) {
       stars[photoPath] = { count: 0, starredBy: [] };
     }
-    
+
     if (!stars[photoPath].starredBy.includes(userId)) {
       stars[photoPath].starredBy.push(userId);
       stars[photoPath].count++;
       saveStars(uploadsRoot, stars);
     }
-    
-    res.send(
-      `<p>Photo starred! Current stars: ${stars[photoPath].count}</p><a href="/admin/star-panel">Back</a>`
-    );
+
+    res.send(`<p>Photo starred! Current stars: ${stars[photoPath].count}</p><a href="/admin/star-panel">Back</a>`);
   });
 
   // POST /admin/unstar (form: photoPath, userId) — unstar a photo
@@ -62,16 +60,16 @@ module.exports = (uploadsRoot) => {
     if (!photoPath || !userId) {
       return res.send(`<p>Error: Missing photoPath or userId</p>`);
     }
-    
+
     const stars = loadStars(uploadsRoot);
     if (stars[photoPath] && stars[photoPath].starredBy.includes(userId)) {
       stars[photoPath].starredBy = stars[photoPath].starredBy.filter((id) => id !== userId);
       stars[photoPath].count = Math.max(0, stars[photoPath].count - 1);
       saveStars(uploadsRoot, stars);
     }
-    
+
     res.send(
-      `<p>Photo unstarred! Current stars: ${stars[photoPath] ? stars[photoPath].count : 0}</p><a href="/admin/star-panel">Back</a>`
+      `<p>Photo unstarred! Current stars: ${stars[photoPath] ? stars[photoPath].count : 0}</p><a href="/admin/star-panel">Back</a>`,
     );
   });
 
@@ -81,31 +79,30 @@ module.exports = (uploadsRoot) => {
     if (!photoPath) {
       return res.send(`<p>Error: Missing photoPath</p>`);
     }
-    
+
     const stars = loadStars(uploadsRoot);
-    res.send(
-      `<p>Stars for ${photoPath}: ${stars[photoPath] ? stars[photoPath].count : 0}</p><a href="/admin/star-panel">Back</a>`
-    );
+    res.send(`<p>Stars for ${photoPath}: ${stars[photoPath] ? stars[photoPath].count : 0}</p><a href="/admin/star-panel">Back</a>`);
   });
 
   // GET /admin/most-starred — get the most-starred photo (HTML)
   router.get("/most-starred", (req, res) => {
     const stars = loadStars(uploadsRoot);
-    let max = 0, most = null;
-    
+    let max = 0,
+      most = null;
+
     for (const [photoPath, data] of Object.entries(stars)) {
       if (data.count > max) {
         max = data.count;
         most = { photoPath, count: data.count };
       }
     }
-    
+
     if (!most) {
       return res.send(`<p>No stars yet.</p><a href="/admin/star-panel">Back</a>`);
     }
-    
+
     res.send(
-      `<p>Most-starred photo: ${most.photoPath} (${most.count} stars)</p><img src="${most.photoPath}" style="max-width:300px;"><br><a href="/admin/star-panel">Back</a>`
+      `<p>Most-starred photo: ${most.photoPath} (${most.count} stars)</p><img src="${most.photoPath}" style="max-width:300px;"><br><a href="/admin/star-panel">Back</a>`,
     );
   });
 
@@ -115,16 +112,14 @@ module.exports = (uploadsRoot) => {
     const rows = Object.entries(stars)
       .map(([photoPath, data]) => `<tr><td>${photoPath}</td><td>${data.count}</td></tr>`)
       .join("");
-    
-    res.send(
-      `<table border="1"><tr><th>Photo</th><th>Stars</th></tr>${rows}</table><a href="/admin/star-panel">Back</a>`
-    );
+
+    res.send(`<table border="1"><tr><th>Photo</th><th>Stars</th></tr>${rows}</table><a href="/admin/star-panel">Back</a>`);
   });
 
   // GET /admin/star-panel — admin UI for starring/un-starring
   router.get("/star-panel", (req, res) => {
     const fs = require("fs");
-    
+
     // List all photos (flatten all user folders)
     let photos = [];
     readdirSync(uploadsRoot, { withFileTypes: true }).forEach((dirent) => {
@@ -138,13 +133,13 @@ module.exports = (uploadsRoot) => {
         });
       }
     });
-    
+
     const stars = loadStars(uploadsRoot);
-    const photosWithStars = photos.map(photoPath => ({
+    const photosWithStars = photos.map((photoPath) => ({
       photoPath,
-      starCount: stars[photoPath]?.count || 0
+      starCount: stars[photoPath]?.count || 0,
     }));
-    
+
     res.render("star-panel", { photos: photosWithStars });
   });
 

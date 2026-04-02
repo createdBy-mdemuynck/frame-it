@@ -3,9 +3,9 @@
  */
 function requireAuth(req, res, next) {
   if (!req.session.adminEmail) {
-    return res.status(401).json({ 
-      success: false, 
-      error: "Authentication required" 
+    return res.status(401).json({
+      success: false,
+      error: "Authentication required",
     });
   }
   next();
@@ -28,19 +28,19 @@ function requireAuthPage(req, res, next) {
  */
 function requireSuperAdmin(req, res, next) {
   if (!req.session.adminEmail) {
-    return res.status(401).json({ 
-      success: false, 
-      error: "Authentication required" 
+    return res.status(401).json({
+      success: false,
+      error: "Authentication required",
     });
   }
-  
+
   if (req.session.adminEmail !== "admin@afsprong.be") {
-    return res.status(403).json({ 
-      success: false, 
-      error: "Access denied. Only admin@afsprong.be can perform this action." 
+    return res.status(403).json({
+      success: false,
+      error: "Access denied. Only admin@afsprong.be can perform this action.",
     });
   }
-  
+
   next();
 }
 

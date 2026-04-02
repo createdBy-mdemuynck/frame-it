@@ -34,23 +34,27 @@ server/
 ## Key Improvements
 
 ### 1. **Separation of Concerns**
+
 - **Routes**: Business logic separated into feature-specific route files
 - **Views**: HTML templates extracted into EJS files (no more inline HTML strings)
 - **Middleware**: Reusable middleware organized by purpose
 - **Main app**: Clean, readable entry point (~70 lines vs 1200+ lines)
 
 ### 2. **Template Engine (EJS)**
+
 - All HTML pages now use EJS templates
 - Server-side rendering with dynamic data
 - Cleaner, more maintainable HTML code
 - Easy to update UI without touching JavaScript
 
 ### 3. **Modular Routes**
+
 - **upload.js**: Handles photo uploads and file serving
 - **api.js**: JSON API endpoints for gallery, leaderboard, and authentication
 - **admin.js**: Admin-specific functionality (star panel, star counts)
 
 ### 4. **Middleware Organization**
+
 - **auth.js**: Authentication checks (both API and page routes)
 - **cors.js**: Cross-origin configuration for Frame It domains
 - **session.js**: Session management configuration
@@ -59,6 +63,7 @@ server/
 ## Route Organization
 
 ### Public Routes (No Authentication Required)
+
 ```
 GET  /                          # Admin login page (login.ejs)
 POST /api/admin/login           # Login endpoint
@@ -68,6 +73,7 @@ POST /api/upload                # Alternative upload endpoint
 ```
 
 ### Protected Routes (Authentication Required)
+
 ```
 GET  /gallery                   # Gallery page (gallery.ejs)
 GET  /leaderboard               # Leaderboard page (leaderboard.ejs)
@@ -86,6 +92,7 @@ GET  /admin/star-counts         # View all star counts (HTML)
 ```
 
 ### File Access Routes
+
 ```
 GET  /uploads                   # List all email folders (email-folders.ejs)
 GET  /uploads/:email            # View thumbnails for email (thumbnails.ejs)
@@ -95,6 +102,7 @@ GET  /uploads/:email/:file      # Static file serving
 ## How to Use
 
 ### 1. Install Dependencies
+
 ```bash
 cd server
 npm install
@@ -103,6 +111,7 @@ npm install
 This will install the new `ejs` dependency along with existing packages.
 
 ### 2. Start the Server
+
 ```bash
 # Development mode with auto-restart
 npm run dev
@@ -112,6 +121,7 @@ npm start
 ```
 
 ### 3. Access the Application
+
 - Admin Login: http://localhost:3001/
 - Gallery: http://localhost:3001/gallery (after login)
 - Leaderboard: http://localhost:3001/leaderboard (after login)
@@ -120,50 +130,57 @@ npm start
 ## Adding New Features
 
 ### Adding a New View
+
 1. Create an EJS file in `views/` folder
 2. Use `res.render('filename', { data })` in your route
 
 Example:
+
 ```javascript
-app.get('/new-page', (req, res) => {
-  res.render('new-page', { 
-    title: 'My Page',
-    data: someData 
+app.get("/new-page", (req, res) => {
+  res.render("new-page", {
+    title: "My Page",
+    data: someData,
   });
 });
 ```
 
 ### Adding New Routes
+
 1. Create a new file in `routes/` folder
 2. Export a function that takes required dependencies
 3. Mount it in `index.js`
 
 Example (`routes/newfeature.js`):
+
 ```javascript
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 module.exports = (uploadsRoot) => {
-  router.get('/feature', (req, res) => {
+  router.get("/feature", (req, res) => {
     // Your logic here
   });
-  
+
   return router;
 };
 ```
 
 In `index.js`:
+
 ```javascript
-const newFeatureRoutes = require('./routes/newfeature')(uploadsRoot);
-app.use('/api', newFeatureRoutes);
+const newFeatureRoutes = require("./routes/newfeature")(uploadsRoot);
+app.use("/api", newFeatureRoutes);
 ```
 
 ### Adding New Middleware
+
 1. Create a new file in `middleware/` folder
 2. Export middleware function(s)
 3. Apply in `index.js`
 
 Example (`middleware/logger.js`):
+
 ```javascript
 function loggerMiddleware(req, res, next) {
   console.log(`${req.method} ${req.url}`);
@@ -174,8 +191,9 @@ module.exports = loggerMiddleware;
 ```
 
 In `index.js`:
+
 ```javascript
-const logger = require('./middleware/logger');
+const logger = require("./middleware/logger");
 app.use(logger);
 ```
 
@@ -187,12 +205,14 @@ app.use(logger);
 ## Migration Notes
 
 ### What Changed
+
 - Main `index.js` reduced from 1200+ lines to ~70 lines
 - All HTML moved from inline strings to EJS templates
 - Routes organized into feature-specific modules
 - Middleware extracted into reusable modules
 
 ### What Stayed the Same
+
 - All endpoints work exactly as before
 - Same upload functionality
 - Same authentication flow
@@ -200,6 +220,7 @@ app.use(logger);
 - Same file structure in uploads/
 
 ### Backward Compatibility
+
 - The original `index.js` is backed up as `index.old.js`
 - All API endpoints maintain the same paths
 - All functionality preserved

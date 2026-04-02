@@ -25,22 +25,22 @@ module.exports = (uploadsRoot) => {
   const uploadHandler = async (req, res) => {
     try {
       const { name, email } = req.body || {};
-      
+
       // Validate presence of fields
       if (!name || !email) {
         if (req.file && fs.existsSync(req.file.path)) {
           fs.unlinkSync(req.file.path);
         }
-        return res.status(400).json({ 
-          success: false, 
-          error: "Missing required fields: name and email" 
+        return res.status(400).json({
+          success: false,
+          error: "Missing required fields: name and email",
         });
       }
-      
+
       if (!req.file) {
-        return res.status(400).json({ 
-          success: false, 
-          error: "Missing required file: photo" 
+        return res.status(400).json({
+          success: false,
+          error: "Missing required file: photo",
         });
       }
 
@@ -50,9 +50,9 @@ module.exports = (uploadsRoot) => {
         if (req.file && fs.existsSync(req.file.path)) {
           fs.unlinkSync(req.file.path);
         }
-        return res.status(400).json({ 
-          success: false, 
-          error: "Invalid email address" 
+        return res.status(400).json({
+          success: false,
+          error: "Invalid email address",
         });
       }
 
@@ -95,10 +95,10 @@ module.exports = (uploadsRoot) => {
       fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
 
       // Respond immediately to the user
-      res.json({ 
-        success: true, 
-        message: "File uploaded successfully", 
-        file: finalName 
+      res.json({
+        success: true,
+        message: "File uploaded successfully",
+        file: finalName,
       });
 
       // Generate thumbnail asynchronously in background
@@ -114,20 +114,16 @@ module.exports = (uploadsRoot) => {
 
           console.log(`📸 Background: Processing thumbnail for ${finalPath}`);
 
-          await sharp(finalPath)
-            .resize(150, 150, { fit: "cover" })
-            .toFile(thumbnailPath);
+          await sharp(finalPath).resize(150, 150, { fit: "cover" }).toFile(thumbnailPath);
 
           console.log(`✅ Background: Thumbnail generated ${thumbnailPath}`);
         } catch (thumbError) {
           console.error(`❌ Background: Thumbnail generation failed for ${finalPath}:`, thumbError.message);
-          
+
           // Try again after a longer delay
           setTimeout(async () => {
             try {
-              await sharp(finalPath)
-                .resize(150, 150, { fit: "cover" })
-                .toFile(thumbnailPath);
+              await sharp(finalPath).resize(150, 150, { fit: "cover" }).toFile(thumbnailPath);
               console.log(`✅ Background retry: Thumbnail generated ${thumbnailPath}`);
             } catch (retryError) {
               console.error(`❌ Background retry also failed for ${finalPath}:`, retryError.message);

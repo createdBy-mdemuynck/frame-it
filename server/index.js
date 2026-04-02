@@ -50,17 +50,17 @@ app.use("/admin", adminRoutes);
 
 // Gallery page route (requires authentication)
 app.get("/gallery", requireAuthPage, (req, res) => {
-  res.render("gallery", { 
+  res.render("gallery", {
     adminEmail: req.session.adminEmail,
-    isSuperAdmin: isSuperAdmin(req)
+    isSuperAdmin: isSuperAdmin(req),
   });
 });
 
 // Leaderboard page route (requires authentication)
 app.get("/leaderboard", requireAuthPage, (req, res) => {
-  res.render("leaderboard", { 
+  res.render("leaderboard", {
     adminEmail: req.session.adminEmail,
-    isSuperAdmin: isSuperAdmin(req)
+    isSuperAdmin: isSuperAdmin(req),
   });
 });
 
