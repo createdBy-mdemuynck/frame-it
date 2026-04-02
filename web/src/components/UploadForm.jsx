@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -13,6 +13,9 @@ export default function UploadForm() {
   const [inputMode, setInputMode] = useState(null); // 'camera' or 'gallery'
   const [serverStatus, setServerStatus] = useState("checking");
   const [apiUrl, setApiUrl] = useState("http://localhost:3001"); // Default
+  
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   // Fetch runtime configuration from API
   useEffect(() => {
@@ -90,6 +93,26 @@ export default function UploadForm() {
     }
     setFile(f);
     setPreview(URL.createObjectURL(f));
+  }
+
+  function handleCameraClick() {
+    setInputMode("camera");
+    // Automatically trigger the file input to open camera
+    setTimeout(() => {
+      if (cameraInputRef.current) {
+        cameraInputRef.current.click();
+      }
+    }, 100);
+  }
+
+  function handleGalleryClick() {
+    setInputMode("gallery");
+    // Automatically trigger the file input to open gallery
+    setTimeout(() => {
+      if (galleryInputRef.current) {
+        galleryInputRef.current.click();
+      }
+    }, 100);
   }
 
   function validate() {
@@ -200,23 +223,37 @@ export default function UploadForm() {
           <button
             type="button"
             className={`mode-button ${inputMode === "camera" ? "active" : ""}`}
-            onClick={() => setInputMode("camera")}
+            onClick={handleCameraClick}
           >
             📷 Use Camera
           </button>
           <button
             type="button"
             className={`mode-button ${inputMode === "gallery" ? "active" : ""}`}
-            onClick={() => setInputMode("gallery")}
+            onClick={handleGalleryClick}
           >
             🖼️ Choose from Gallery
           </button>
         </div>
-        {inputMode === "camera" && (
-          <input name="photo" type="file" accept="image/*" capture="environment" onChange={handleFileChange} />
-        )}
-        {inputMode === "gallery" && <input name="photo" type="file" accept="image/*" onChange={handleFileChange} />}
-        <small className="hint">Max 5MB.</small>
+        {/* Hidden file inputs that are triggered programmatically */}
+        <input
+          ref={cameraInputRef}
+          name="photo-camera"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+        />
+        <input
+          ref={galleryInputRef}
+          name="photo-gallery"
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+        />
+        <small className="hint">Max 5MB. {file ? `Selected: ${file.name}` : ""}</small>
       </div>
 
       {preview && (
