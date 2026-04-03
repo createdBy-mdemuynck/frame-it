@@ -14,6 +14,7 @@ yarn-debug.log*
 yarn-error.log*
 # Server node_modules
 /server/node_modules/
+/server/uploads/
 /web/node_modules/
 .squad/orchestration-log/
 .squad/log/
