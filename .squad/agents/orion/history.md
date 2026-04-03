@@ -39,3 +39,15 @@ Notes: local uploads/ directory is runtime-created and should not be relied on f
   - `azd provision` (to apply infrastructure changes)
   - `az containerapp show` (to verify volume mount configuration)
   - `az storage file list` (to verify Azure Files connectivity)
+
+## Orchestration Entry - 2026-04-03T15:30:00Z
+- Orion: Deployed updated gallery modal feature to Azure Container Apps.
+- **Context**: Gallery view (server/views/gallery.ejs) was updated to show original images in a modal when clicked. Changes were committed to git.
+- **Deployment**: Ran `azd deploy` to rebuild and redeploy both backoffice and frontoffice containers.
+- **Duration**: Deployment completed successfully in 50 seconds.
+- **Verification**: Confirmed service health at https://cabackoffice-vg74p4kett4ws.greensea-7f401167.westeurope.azurecontainerapps.io/health. Gallery endpoint redirects to login (expected behavior for protected routes).
+- **Key learning**: `azd deploy` efficiently rebuilds and redeploys containers without reprovisioning infrastructure, ideal for code-only updates.
+- Files affected:
+  - server/views/gallery.ejs (modal feature)
+- Deployment command:
+  - `azd deploy` (rebuild and redeploy containers)
