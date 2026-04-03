@@ -2,6 +2,20 @@
 
 ## Active Decisions
 
+### Azure Files Mount Path Correction
+Decision: Azure Files volume mount path must align with container runtime working directory. When Dockerfile sets `WORKDIR /app` and code uses `path.join(__dirname, 'uploads')`, the mount path must be `/app/uploads`, not `/app/server/uploads`.
+
+Rationale: The gallery API was returning "No photos uploaded yet" despite photos existing in Azure Files storage. Root cause was mount path mismatch - infrastructure mounted at `/app/server/uploads` but server runtime resolved `__dirname` to `/app` (from Dockerfile WORKDIR), so `uploadsRoot` was `/app/uploads`.
+
+Solution: Updated `infra/main.bicep` volumeMounts.mountPath from `/app/server/uploads` to `/app/uploads`. Applied with `azd provision`.
+
+Key Learning: Container runtime paths depend on Dockerfile WORKDIR, not source directory structure. Always verify actual runtime `__dirname` values match infrastructure mount paths. Use diagnostic logging to trace filesystem access issues.
+
+Date: 2026-04-03  
+Author: Orion
+
+---
+
 ### Choose Next.js for frontend + Express backend
 Decision: For the initial scaffold we choose Next.js for the frontend and Express for the backend. This allows server-side rendering where needed, easy deployment options, and a familiar Node.js stack for the team.
 

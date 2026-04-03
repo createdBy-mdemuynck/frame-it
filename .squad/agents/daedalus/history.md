@@ -24,3 +24,6 @@ Seeded at team creation.
 - **Verification**: Deployed via `azd provision` and confirmed 10GB Azure Files SMB mount at `/app/uploads` using `df -h`.
 - **Architectural Choice**: Selected Azure Files mounting over SDK-based approach for Container Apps persistent storage (see decision record).
 
+## Cross-Reference (2026-04-03)
+- **Mount Path Validation**: Orion encountered and fixed a regression where the Azure Files mount path had been changed to `/app/server/uploads`. Fix confirmed the original analysis that `/app/uploads` is correct based on Dockerfile WORKDIR. This validates the architectural pattern documented above. See orchestration log `20260403T145522Z-orion.md` for details.
+
