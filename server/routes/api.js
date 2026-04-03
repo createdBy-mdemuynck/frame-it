@@ -47,17 +47,32 @@ module.exports = (uploadsRoot) => {
   // Gallery API - Get all photos with metadata
   router.get("/gallery", (req, res) => {
     try {
+      console.log("[Gallery API] Scanning uploads from:", uploadsRoot);
       const photos = [];
       const stars = loadStars(uploadsRoot);
-      const folders = fs
-        .readdirSync(uploadsRoot, { withFileTypes: true })
-        .filter((dirent) => dirent.isDirectory() && dirent.name !== "tmp");
+      
+      // Check if uploadsRoot exists and is readable
+      if (!fs.existsSync(uploadsRoot)) {
+        console.error("[Gallery API] ERROR: uploadsRoot does not exist:", uploadsRoot);
+        return res.json({ success: true, photos: [] });
+      }
+      
+      const allEntries = fs.readdirSync(uploadsRoot, { withFileTypes: true });
+      console.log("[Gallery API] Found", allEntries.length, "entries in uploadsRoot");
+      console.log("[Gallery API] All entries:", allEntries.map(e => `${e.name} (${e.isDirectory() ? 'dir' : 'file'})`));
+      
+      const folders = allEntries.filter((dirent) => dirent.isDirectory() && dirent.name !== "tmp");
+      console.log("[Gallery API] Filtered to", folders.length, "user directories (excluding tmp)");
 
       folders.forEach((folder) => {
         const userDir = path.join(uploadsRoot, folder.name);
-        const files = fs
-          .readdirSync(userDir, { withFileTypes: true })
-          .filter((file) => file.isFile() && !file.name.endsWith(".json") && !file.name.startsWith("."));
+        console.log(`[Gallery API] Processing folder: ${folder.name}, path: ${userDir}`);
+        
+        const allFiles = fs.readdirSync(userDir, { withFileTypes: true });
+        console.log(`[Gallery API]   Found ${allFiles.length} items in ${folder.name}`);
+        
+        const files = allFiles.filter((file) => file.isFile() && !file.name.endsWith(".json") && !file.name.startsWith("."));
+        console.log(`[Gallery API]   Filtered to ${files.length} photo files:`, files.map(f => f.name));
 
         files.forEach((file) => {
           const photoPath = `/uploads/${folder.name}/${file.name}`;
@@ -87,6 +102,7 @@ module.exports = (uploadsRoot) => {
         });
       });
 
+      console.log("[Gallery API] Total photos found:", photos.length);
       res.json({ success: true, photos });
     } catch (error) {
       console.error("Error fetching gallery:", error);
