@@ -51,3 +51,16 @@ Notes: local uploads/ directory is runtime-created and should not be relied on f
   - server/views/gallery.ejs (modal feature)
 - Deployment command:
   - `azd deploy` (rebuild and redeploy containers)
+
+## Orchestration Entry - 2026-04-03T16:00:00Z
+- Orion: Fixed JavaScript syntax error in gallery page causing "Loading gallery..." to hang indefinitely.
+- **Root cause**: Line 266 in server/views/gallery.ejs had malformed JavaScript - extra code fragment `onclick="openModal('${photo.photoPath}')" title="Click to view full size"` was incorrectly inserted into the `if (photos.length === 0)` condition, breaking the entire renderGallery() function.
+- **Symptoms**: Deployed gallery page showed "Loading gallery..." indefinitely. The /api/gallery endpoint was working correctly and returning `{"success":true,"photos":[]}`, but JavaScript execution failed due to syntax error.
+- **Fix**: Removed the malformed code fragment from line 266, restoring proper JavaScript syntax.
+- **Deployment**: Committed fix and ran `azd deploy` to redeploy (completed in 50 seconds).
+- **Key learning**: Always verify JavaScript syntax in EJS templates - syntax errors can cause silent failures in browser execution. Test deployed pages in browser console to catch client-side JavaScript errors.
+- Files modified:
+  - server/views/gallery.ejs (line 266: removed malformed onclick/title attributes)
+- Deployment commands:
+  - `git commit -m "fix: repair malformed JavaScript in gallery.ejs renderGallery function"`
+  - `azd deploy`
