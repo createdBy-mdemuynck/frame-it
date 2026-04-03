@@ -16,7 +16,9 @@ The Azure Files storage mount path has been corrected and deployed. Files upload
 ## How to Test
 
 ### Option 1: Upload via Application (Recommended)
+
 1. Navigate to your backoffice URL:
+
    ```
    https://cabackoffice-vg74p4kett4ws.greensea-7f401167.westeurope.azurecontainerapps.io/
    ```
@@ -24,6 +26,7 @@ The Azure Files storage mount path has been corrected and deployed. Files upload
 2. Upload a test photo with name and email
 
 3. Verify file appears in Azure Storage:
+
    ```powershell
    az storage file list `
      --account-name stvg74p4kett4ws `
@@ -33,6 +36,7 @@ The Azure Files storage mount path has been corrected and deployed. Files upload
    ```
 
 4. **Critical test**: Restart the container and verify the file is still there
+
    ```powershell
    az containerapp revision restart `
      --name cabackoffice-vg74p4kett4ws `
@@ -42,6 +46,7 @@ The Azure Files storage mount path has been corrected and deployed. Files upload
 5. Check the uploads are still accessible after restart
 
 ### Option 2: Azure Portal Verification
+
 1. Open [Azure Portal](https://portal.azure.com)
 2. Navigate to Storage Account: `stvg74p4kett4ws`
 3. Go to **Data storage** → **File shares**
@@ -49,6 +54,7 @@ The Azure Files storage mount path has been corrected and deployed. Files upload
 5. Browse directories - you should see uploaded files organized by email
 
 ### Option 3: CLI Verification
+
 ```powershell
 # List all files in the share (recursive)
 az storage file list `
@@ -82,29 +88,32 @@ az storage share show `
 ✅ **Files persist** across container restarts  
 ✅ **Files are shared** across multiple container instances  
 ✅ **Automatic backups** via Azure Storage redundancy  
-✅ **No code changes** needed in application  
+✅ **No code changes** needed in application
 
 ## Troubleshooting
 
 ### If files still don't persist:
 
 1. **Check mount status:**
+
    ```powershell
    az containerapp show `
      --name cabackoffice-vg74p4kett4ws `
      --resource-group rg-frame-it-production `
      --query "properties.template.{volumes:volumes, mounts:containers[0].volumeMounts}"
    ```
-   
+
    Should show:
+
    ```json
    {
-     "mounts": [{"mountPath": "/app/server/uploads", "volumeName": "uploads-storage"}],
-     "volumes": [{"name": "uploads-storage", "storageType": "AzureFile"}]
+     "mounts": [{ "mountPath": "/app/server/uploads", "volumeName": "uploads-storage" }],
+     "volumes": [{ "name": "uploads-storage", "storageType": "AzureFile" }]
    }
    ```
 
 2. **Check Container Apps Environment storage:**
+
    ```powershell
    az containerapp env storage show `
      --name caevg74p4kett4ws `
@@ -113,6 +122,7 @@ az storage share show `
    ```
 
 3. **Check application logs:**
+
    ```powershell
    az containerapp logs show `
      --name cabackoffice-vg74p4kett4ws `
@@ -131,6 +141,7 @@ az storage share show `
 ## Next Steps (Optional Enhancements)
 
 1. **Enable soft delete** for accidental deletion protection:
+
    ```powershell
    az storage share update `
      --name frameit-uploads `
@@ -148,6 +159,7 @@ az storage share show `
 ## Support
 
 If you encounter issues:
+
 1. Check the troubleshooting steps above
 2. Review logs with `az containerapp logs show`
 3. Verify storage connectivity with `az storage file list`
