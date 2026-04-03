@@ -29,3 +29,13 @@ Seeded at team creation.
 ## Orchestration Entry - 2026-04-03T14:45:00Z
 - Astra: Completed click-to-view modal for gallery images. Users can now click thumbnails to view full-size originals in a responsive lightbox overlay. See orchestration log for details.
 
+## Learnings (2026-04-03 - Modal Fix)
+- Fixed gallery modal not opening: the img tag was missing the onclick handler
+- The modal infrastructure (openModal/closeModal functions, CSS, HTML structure) was already implemented correctly
+- Issue was in renderGallery() - img tag needs onclick="openModal('${photo.photoPath}')" to trigger the modal
+- Always ensure event handlers are properly attached to interactive elements during dynamic rendering
+- Mobile-first consideration: onclick works for both desktop clicks and mobile taps
+
+## Orchestration Entry - 2026-04-03T15:03:27Z
+- Astra: Fixed missing onclick handler on gallery thumbnails. Added onclick="openModal('${photo.photoPath}')" to thumbnail images in renderGallery(). Gallery thumbnails now open full-size lightbox on click/tap. See orchestration log for details.
+

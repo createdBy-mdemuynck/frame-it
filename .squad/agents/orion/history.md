@@ -81,3 +81,18 @@ Notes: local uploads/ directory is runtime-created and should not be relied on f
   - `azd deploy backoffice` (redeploy with new mount)
   - `az containerapp show` (verify mount configuration)
   - `az storage file list` (verify Azure Files contents)
+
+## Orchestration Entry - 2026-04-03T16:45:00Z
+- Orion: Deployed gallery onclick handler fix to Azure Container Apps.
+- **Context**: Astra updated server/views/gallery.ejs with onclick handlers to enable modal display when clicking thumbnail images. Changes were committed and ready for deployment.
+- **Deployment**: Ran `azd deploy` to rebuild and redeploy both backoffice and frontoffice containers.
+- **Duration**: Deployment completed successfully in 49 seconds.
+- **Verification**: Confirmed service health at https://cabackoffice-vg74p4kett4ws.greensea-7f401167.westeurope.azurecontainerapps.io/health - service returned {"status":"ok"}.
+- **Key learning**: Rapid deployment cycle for view-only changes - no infrastructure provisioning needed, just container rebuild and redeploy. Gallery modal feature now fully functional in production.
+- Files affected:
+  - server/views/gallery.ejs (onclick handlers for thumbnails)
+- Deployment command:
+  - `azd deploy` (rebuild and redeploy containers)
+
+## Orchestration Entry - 2026-04-03T15:03:27Z
+- Orion: Deployed gallery modal fix to Azure Container Apps following Astra's onclick handler fix. Duration: 49 seconds. Service health confirmed. Gallery thumbnails now fully functional with lightbox modal in production. See orchestration log for details.

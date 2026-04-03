@@ -1,0 +1,9 @@
+docs(squad): log gallery modal onclick fix by Astra & Orion
+
+- Astra: Fixed missing onclick handler on gallery thumbnails
+- Orion: Deployed fix to Azure (49s deployment, service healthy)
+- Issue: Gallery thumbnails didn't open full-size image modal
+- Fix: Added onclick="openModal('${photo.photoPath}')" to img elements
+- Outcome: Gallery thumbnails now open lightbox on click/tap
+- Added orchestration logs and session log
+- Updated agent history for Astra and Orion
