@@ -25,3 +25,17 @@ Notes: local uploads/ directory is runtime-created and should not be relied on f
 
 ## Orchestration Entry - 2026-03-25T21:00:00Z
 - Orion: working on admin star feature (backend integration). See orchestration log for details.
+
+## Orchestration Entry - 2026-04-03T15:15:00Z
+- Orion: Fixed Azure Files storage mount path mismatch preventing uploaded files from persisting.
+- **Root cause**: Volume mount was configured at `/app/uploads` but server writes to `/app/server/uploads` (defined in server/index.js line 26).
+- **Fix**: Updated infra/main.bicep volumeMounts.mountPath from `/app/uploads` to `/app/server/uploads`.
+- **Deployment**: Ran `azd provision` to apply infrastructure changes. Verified with `az containerapp show` that mount path is correct.
+- **Verification**: Confirmed Azure Files share `frameit-uploads` is accessible and contains `tmp/` directory created by server.
+- **Key learning**: Always verify container paths match mount paths when configuring persistent storage. The server's `uploadsRoot` definition determines where files are written.
+- Files modified:
+  - infra/main.bicep (line 166: corrected mountPath)
+- Deployment commands:
+  - `azd provision` (to apply infrastructure changes)
+  - `az containerapp show` (to verify volume mount configuration)
+  - `az storage file list` (to verify Azure Files connectivity)

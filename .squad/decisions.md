@@ -83,6 +83,45 @@ TODO / Next steps:
 Author: Orion
 Date: 2026-03-25
 
+---
+
+### Run server on PORT=3002 locally
+Decision: For local development and to avoid conflicts with an existing Node process bound to port 3000, the backend runs with PORT=3002. No code changes required.
+
+Rationale: Avoids port conflicts during development while maintaining flexibility for different environments.
+
+Note: If CI or deployment expects a different port, update the start scripts or environment configuration accordingly.
+
+Date: 2026-04-03
+Author: Orion
+
+---
+
+### Azure Storage Integration for File Uploads
+Decision: Mount Azure Files share directly to Container App at /app/uploads path instead of using Azure Blob SDK for file operations.
+
+Rationale: 
+- Simpler integration with existing Express server code expecting filesystem operations
+- No code changes required in upload handlers
+- Azure Files provides SMB-compatible file system semantics
+- Container Apps native support for Azure Files mounting
+
+Implementation:
+- Added storage mount configuration in container-apps-environment.bicep
+- Configured volumeMounts in container-app.bicep
+- Connected storage account file share to backoffice container via main.bicep
+- Mount point: /app/uploads (matches server expectations)
+
+Consequences:
+- Files persist across container restarts
+- Shared storage accessible to all container replicas
+- Requires Azure Files SKU (Standard or Premium)
+- Network latency considerations for file operations
+
+Date: 2026-04-03
+Author: Coordinator (via Daedalus capture)
+
+---
 
 # API Contract: Admin Star Feature
 
