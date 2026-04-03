@@ -96,3 +96,13 @@ Notes: local uploads/ directory is runtime-created and should not be relied on f
 
 ## Orchestration Entry - 2026-04-03T15:03:27Z
 - Orion: Deployed gallery modal fix to Azure Container Apps following Astra's onclick handler fix. Duration: 49 seconds. Service health confirmed. Gallery thumbnails now fully functional with lightbox modal in production. See orchestration log for details.
+
+## Orchestration Entry - 2026-04-03T17:15:00Z
+- Orion: Fixed unwanted image auto-rotation in thumbnail generation.
+- **Root cause**: Sharp library automatically applies EXIF orientation metadata by default, causing thumbnails to be rotated even when users want to preserve the exact uploaded orientation.
+- **User requirement**: Keep pictures in the exact orientation as uploaded, without applying EXIF-based auto-rotation.
+- **Fix**: Added `.rotate(0)` to both sharp thumbnail generation calls in server/routes/upload.js (lines ~112 and ~124). This explicitly disables EXIF-based auto-rotation.
+- **Implementation**: Modified sharp pipeline from `sharp(finalPath).resize(...)` to `sharp(finalPath).rotate(0).resize(...)` in both the initial attempt and retry logic.
+- **Key learning**: Sharp auto-rotates images based on EXIF orientation by default. To preserve raw pixel orientation as uploaded, explicitly call `.rotate(0)` before other transformations. The original uploaded images are unaffected (just moved/copied), only thumbnails needed the fix.
+- Files modified:
+  - server/routes/upload.js (added .rotate(0) to sharp thumbnail generation)
