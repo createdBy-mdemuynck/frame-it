@@ -17,3 +17,15 @@ Seeded at team creation.
 ## Orchestration Entry - 2026-03-25T21:00:00Z
 - Astra: working on admin star feature (frontend integration). See orchestration log for details.
 
+## Learnings (2026-04-03)
+- Implemented lightbox/modal functionality for gallery.ejs to display original images on click
+- Modal features: click image to open, ESC key to close, click outside to close, X button to close
+- Used vanilla JavaScript for consistency with existing gallery implementation
+- Added cursor pointer and hover scale effect on thumbnails for better UX
+- Modal styling includes fade-in animation and is fully responsive (90% viewport on desktop, 95% on mobile)
+- Prevents body scrolling when modal is open for better mobile experience
+- Original image paths from photo.photoPath are used in the modal
+
+## Orchestration Entry - 2026-04-03T14:45:00Z
+- Astra: Completed click-to-view modal for gallery images. Users can now click thumbnails to view full-size originals in a responsive lightbox overlay. See orchestration log for details.
+

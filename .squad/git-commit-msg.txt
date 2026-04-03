@@ -1,1 +1,6 @@
-Scribe: document Calypso admin star test run, merge decisions inbox, update logs and decisions.
+docs(squad): Add orchestration and session logs
+
+- Created orchestration-log/2026-04-03T00-00-00Z-orion.md
+- Created log/2026-04-03T00-00-00Z-azure-storage-fix.md
+
+Completed by: Scribe
