@@ -114,7 +114,7 @@ module.exports = (uploadsRoot) => {
 
           console.log(`📸 Background: Processing thumbnail for ${finalPath}`);
 
-          await sharp(finalPath).resize(150, 150, { fit: "cover" }).toFile(thumbnailPath);
+          await sharp(finalPath).rotate(0).resize(150, 150, { fit: "cover" }).toFile(thumbnailPath);
 
           console.log(`✅ Background: Thumbnail generated ${thumbnailPath}`);
         } catch (thumbError) {
@@ -123,7 +123,7 @@ module.exports = (uploadsRoot) => {
           // Try again after a longer delay
           setTimeout(async () => {
             try {
-              await sharp(finalPath).resize(150, 150, { fit: "cover" }).toFile(thumbnailPath);
+              await sharp(finalPath).rotate(0).resize(150, 150, { fit: "cover" }).toFile(thumbnailPath);
               console.log(`✅ Background retry: Thumbnail generated ${thumbnailPath}`);
             } catch (retryError) {
               console.error(`❌ Background retry also failed for ${finalPath}:`, retryError.message);
