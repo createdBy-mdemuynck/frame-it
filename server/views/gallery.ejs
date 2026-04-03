@@ -102,6 +102,11 @@
       width: 100%;
       height: 200px;
       object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .card img:hover {
+      transform: scale(1.05);
     }
     .card-footer {
       padding: 12px;
@@ -139,6 +144,76 @@
       color: #c00;
       margin-bottom: 16px;
     }
+    /* Modal/Lightbox Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      animation: fadeIn 0.3s;
+    }
+    .modal.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-content {
+      position: relative;
+      max-width: 90%;
+      max-height: 90%;
+      animation: zoomIn 0.3s;
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.8); }
+      to { transform: scale(1); }
+    }
+    .modal-content img {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 90vh;
+      display: block;
+      border-radius: 8px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 35px;
+      color: #fff;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1001;
+      transition: color 0.2s;
+      user-select: none;
+    }
+    .modal-close:hover,
+    .modal-close:focus {
+      color: #ccc;
+    }
+    /* Mobile adjustments for modal */
+    @media (max-width: 768px) {
+      .modal-close {
+        top: 10px;
+        right: 15px;
+        font-size: 30px;
+      }
+      .modal-content {
+        max-width: 95%;
+        max-height: 95%;
+      }
+      .modal-content img {
+        max-height: 85vh;
+      }
+    }
   </style>
 </head>
 <body>
@@ -156,6 +231,14 @@
 
   <div id="error" class="error" style="display:none;"></div>
   <div id="gallery" class="loading">Loading gallery...</div>
+
+  <!-- Modal for viewing original images -->
+  <div id="imageModal" class="modal" onclick="closeModal(event)">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <div class="modal-content">
+      <img id="modalImage" src="" alt="Full size image">
+    </div>
+  </div>
 
   <script>
     let photos = [];
@@ -317,6 +400,31 @@
       errorDiv.textContent = message;
       errorDiv.style.display = 'block';
     }
+
+    // Modal/Lightbox functions
+    function openModal(photoPath) {
+      const modal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalImage');
+      modal.classList.add('active');
+      modalImg.src = photoPath;
+      document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+    }
+
+    function closeModal(event) {
+      // Close if clicking outside the image or on the close button
+      if (!event || event.target.id === 'imageModal' || event.target.classList.contains('modal-close')) {
+        const modal = document.getElementById('imageModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Restore scrolling
+      }
+    }
+
+    // ESC key to close modal
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    });
 
     loadGallery();
   </script>
