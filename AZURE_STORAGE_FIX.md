@@ -1,24 +1,29 @@
 # Azure Storage Connection Fix
 
 ## Problem
+
 Files were being saved to the **local container filesystem** (`/uploads/`) which is ephemeral. When containers restart or scale, all uploaded files are lost.
 
 ## Solution Implemented
+
 Connected Azure Files storage to your Container App by mounting the Azure File Share as a persistent volume.
 
 ## Changes Made
 
 ### 1. Container Apps Environment ([container-apps-environment.bicep](infra/core/host/container-apps-environment.bicep))
+
 - Added parameters for storage account details
 - Created storage mount resource that connects Azure Files to the environment
 - Files will now persist in Azure Storage Account
 
 ### 2. Container App Definition ([container-app.bicep](infra/core/host/container-app.bicep))
+
 - Added `volumeMounts` parameter
 - Configured containers to mount volumes at specified paths
 - Defined volume definitions linked to Azure Files storage
 
 ### 3. Main Infrastructure ([main.bicep](infra/main.bicep))
+
 - Updated Container Apps Environment to receive storage account credentials
 - Configured backoffice container to mount Azure Files at `/app/server/uploads`
 - Added proper dependency chain to ensure storage is created first
@@ -26,11 +31,12 @@ Connected Azure Files storage to your Container App by mounting the Azure File S
 ## How It Works
 
 ```
-Upload Flow:  
+Upload Flow:
 User uploads → Server saves to /app/server/uploads → Mounted Azure Files → Persistent Storage
 ```
 
 The `/app/server/uploads` directory in your container is now **backed by Azure Files**, so:
+
 - ✅ Files persist across container restarts
 - ✅ Files are shared across multiple container instances
 - ✅ No code changes needed in your application
@@ -39,12 +45,14 @@ The `/app/server/uploads` directory in your container is now **backed by Azure F
 ## Deploy the Fix
 
 ### Option 1: Using Azure Developer CLI (azd)
+
 ```powershell
 # Deploy infrastructure and redeploy containers
 azd up
 ```
 
 ### Option 2: Manual Deployment
+
 ```powershell
 # 1. Deploy infrastructure
 az deployment group create `
@@ -65,6 +73,7 @@ docker push <registry-name>.azurecr.io/backoffice:latest
 After deployment:
 
 1. **Check volume mount:**
+
    ```powershell
    az containerapp show --name <backoffice-app-name> --resource-group <rg-name> --query "properties.template.volumes"
    ```
@@ -72,6 +81,7 @@ After deployment:
 2. **Upload a test file** via your application
 
 3. **Check Azure Storage:**
+
    ```powershell
    az storage file list --share-name frameit-uploads --account-name <storage-account-name>
    ```
@@ -83,6 +93,7 @@ After deployment:
 ### Files still not persisting?
 
 **Check mount path:**
+
 ```powershell
 # Connect to container (if exec is enabled)
 az containerapp exec --name <backoffice-app-name> --resource-group <rg-name>
@@ -95,6 +106,7 @@ ls -la /app/server/uploads
 The deployment uses `listKeys()` to automatically get the storage key. Ensure the deployment has permission to access storage account keys.
 
 **Check Container Apps Environment storage:**
+
 ```powershell
 az containerapp env storage show `
   --name <environment-name> `
@@ -107,6 +119,7 @@ az containerapp env storage show `
 If you prefer Azure Blob Storage with SDK (better for large files, CDN, etc):
 
 1. **Install Azure SDK:**
+
    ```bash
    cd server
    npm install @azure/storage-blob @azure/identity
