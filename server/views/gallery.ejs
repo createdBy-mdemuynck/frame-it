@@ -271,7 +271,7 @@
       gallery.className = 'grid';
       gallery.innerHTML = photos.map((photo, index) => `
         <div class="card">
-          <img src="${photo.thumbnailPath}" alt="Photo">
+          <img src="${photo.thumbnailPath}" alt="Photo" onclick="openModal('${photo.photoPath}')">
           <div class="card-footer">
             <button 
               class="star-btn ${photo.starred ? 'starred' : ''}" 
