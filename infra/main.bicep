@@ -116,6 +116,9 @@ module containerAppsEnvironment 'core/host/container-apps-environment.bicep' = {
     tags: tags
     logAnalyticsWorkspaceId: logAnalytics.outputs.id
     logAnalyticsWorkspaceKey: logAnalytics.outputs.primarySharedKey
+    storageAccountName: '${abbrs.storageStorageAccounts}${resourceToken}'
+    storageAccountKey: listKeys(resourceId('Microsoft.Storage/storageAccounts', '${abbrs.storageStorageAccounts}${resourceToken}'), '2023-01-01').keys[0].value
+    fileShareName: 'frameit-uploads'
   }
 }
 
@@ -155,6 +158,12 @@ module backoffice 'core/host/container-app.bicep' = {
         name: 'session-secret'
         keyVaultUrl: '${keyVault.outputs.endpoint}secrets/session-secret'
         identity: managedIdentity.outputs.id
+      }
+    ]
+    volumeMounts: [
+      {
+        volumeName: 'uploads-storage'
+        mountPath: '/app/uploads'
       }
     ]
     enableCors: true
@@ -208,7 +217,6 @@ module frontoffice 'core/host/container-app.bicep' = {
   }
   dependsOn: [
     acrPullRoleAssignment
-    backoffice
   ]
 }
 
