@@ -15,6 +15,7 @@ param cpu string = '0.25'
 param memory string = '0.5Gi'
 param minReplicas int = 0
 param maxReplicas int = 10
+param volumeMounts array = []
 
 resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
@@ -60,8 +61,14 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             memory: memory
           }
           env: environmentVariables
+          volumeMounts: volumeMounts
         }
       ]
+      volumes: [for mount in volumeMounts: {
+        name: mount.volumeName
+        storageName: mount.volumeName
+        storageType: 'AzureFile'
+      }]
       scale: {
         minReplicas: minReplicas
         maxReplicas: maxReplicas
