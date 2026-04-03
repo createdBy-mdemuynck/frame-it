@@ -64,3 +64,20 @@ Notes: local uploads/ directory is runtime-created and should not be relied on f
 - Deployment commands:
   - `git commit -m "fix: repair malformed JavaScript in gallery.ejs renderGallery function"`
   - `azd deploy`
+
+## Orchestration Entry - 2026-04-03T16:35:00Z
+- Orion: Fixed gallery showing "No photos uploaded yet" despite photos existing in Azure Files storage.
+- **Root cause**: Azure Files mount path mismatch between infrastructure configuration and actual server runtime path. The server Dockerfile sets `WORKDIR /app` and copies code there, so `uploadsRoot = path.join(__dirname, 'uploads')` resolves to `/app/uploads`. However, the Azure Files volume was mounted at `/app/server/uploads` (from a previous fix that incorrectly assumed the server ran from `/app/server`).
+- **Diagnosis**: Added diagnostic logging to /api/gallery endpoint (server/routes/api.js) to trace directory scanning. Logs revealed the API was scanning `/app/uploads` but finding only `tmp/` directory, while photos existed in Azure Files under user directories.
+- **Fix**: Updated infra/main.bicep volumeMounts.mountPath from `/app/server/uploads` to `/app/uploads` to match the actual container working directory.
+- **Deployment**: Ran `azd provision` (1m 45s) to update infrastructure, then `azd deploy backoffice` (24s) to apply changes. Verified via Azure CLI that mount path was `/app/uploads` and confirmed with `az storage file list` that photos exist in the share.
+- **Verification**: Gallery API now successfully returns photos. Tested with `curl /api/gallery` - returned 1 photo with correct metadata and thumbnail path. Cleaned up diagnostic logging after verification.
+- **Key learning**: Container runtime paths depend on Dockerfile WORKDIR and code structure, not just source directory layout. Always verify the actual runtime value of `__dirname` in the container matches infrastructure mount paths. Use diagnostic logging to trace filesystem access issues.
+- Files modified:
+  - infra/main.bicep (line 166: corrected mountPath from `/app/server/uploads` to `/app/uploads`)
+  - server/routes/api.js (added temporary diagnostic logging, then removed after verification)
+- Deployment commands:
+  - `azd provision` (apply infrastructure changes)
+  - `azd deploy backoffice` (redeploy with new mount)
+  - `az containerapp show` (verify mount configuration)
+  - `az storage file list` (verify Azure Files contents)
