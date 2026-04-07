@@ -303,115 +303,132 @@ export default function UploadForm() {
   }
 
   return (
-    <form className="upload-form" onSubmit={handleSubmit} noValidate>
-      <div className="logo-container">
-        <div className="logo-title-left">Fotowedstrijd</div>
-        <img src="/logo.png?v=2" alt="Transformart" className="logo" />
-        <div className="logo-title-right">TransformArt</div>
-      </div>
-
-      <div className="intro-text">
-        <p>
-          Fijn dat je meedoet aan onze wedstrijd! Upload jouw foto van (1 van) de kunstwerken en maak kans op 1 van onze mooie
-          prijzen. Mede mogelijk gemaakt door onze fantastische sponsors.
-        </p>
-        <p>
-          <strong>Vergeet zeker ook niet jouw contactgegevens achter te laten.</strong>
-        </p>
-        <p className="event-info">De uitreiking van de prijzen vindt plaats om XX uur @de afsprong (Afsneedorp 22)</p>
-      </div>
-      {serverStatus === "offline" && (
-        <div className="error">⚠️ Kan geen verbinding maken met de server op {apiUrl}. Zorg dat de server actief is.</div>
-      )}
-      {serverStatus === "checking" && <div className="status">Serververbinding controleren...</div>}
-
-      <div className="field contact-fields">
-        <label className="field-inline">
-          <span className="label">Naam</span>
-          <input
-            type="text"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Jouw volledige naam"
-            required
-          />
-        </label>
-
-        <label className="field-inline">
-          <span className="label">E-mail</span>
-          <input
-            name="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="jij@voorbeeld.be"
-            required
-          />
-        </label>
-      </div>
-
-      <div className="field file-field">
-        <span className="label">Foto</span>
-        <div className="input-mode-buttons">
-          <button type="button" className={`mode-button ${inputMode === "camera" ? "active" : ""}`} onClick={handleCameraClick}>
-            📷 Gebruik Camera
-          </button>
-          <button type="button" className={`mode-button ${inputMode === "gallery" ? "active" : ""}`} onClick={handleGalleryClick}>
-            🖼️ Kies uit Galerij
-          </button>
-        </div>
-        {/* Hidden file inputs that are triggered programmatically */}
-        <input
-          ref={cameraInputRef}
-          name="photo-camera"
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={(e) => handleFileChange(e, "camera")}
-          style={{ display: "none" }}
-        />
-        <input
-          ref={galleryInputRef}
-          name="photo-gallery"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => handleFileChange(e, "gallery")}
-          style={{ display: "none" }}
-        />
-        <small className="hint">
-          Max 10MB per foto. {inputMode === "gallery" ? `Tot ${MAX_FILES} foto's.` : ""}
-          {files.length > 0 ? ` Geselecteerd: ${files.length} foto${files.length > 1 ? "'s" : ""}` : ""}
-        </small>
-      </div>
-
-      {previews.length > 0 && (
-        <div className="preview-container">
-          {previews.map((preview, index) => (
-            <div key={index} className="preview">
-              <img src={preview.url} alt={`preview ${index + 1}`} />
-              <small className="preview-name">{preview.name}</small>
+    <>
+      {/* Loading overlay with TransformArt logo */}
+      {(serverStatus === "checking" || submitting) && (
+        <div className="loading-overlay">
+          <div className="loading-content">
+            <div className="loading-logo-wrapper">
+              <img src="/logo.png?v=2" alt="TransformArt" className="loading-logo" />
             </div>
-          ))}
+            <div className="loading-text">
+              {serverStatus === "checking" ? "Verbinding maken met server..." : "Foto's uploaden..."}
+            </div>
+            {uploadProgress && <div className="loading-progress">{uploadProgress}</div>}
+          </div>
         </div>
       )}
 
-      {uploadProgress && <div className="upload-progress">{uploadProgress}</div>}
-      {error && <div className="error">{error}</div>}
-      {status && <div className="status">{status}</div>}
+      <form className="upload-form" onSubmit={handleSubmit} noValidate>
+        <div className="logo-container">
+          <div className="logo-title-left">Fotowedstrijd</div>
+          <img src="/logo.png?v=2" alt="Transformart" className="logo" />
+          <div className="logo-title-right">TransformArt</div>
+        </div>
 
-      <button className="submit" type="submit" disabled={submitting}>
-        {submitting ? "Uploaden…" : "Verzenden"}
-      </button>
+        <div className="intro-text">
+          <p>
+            Fijn dat je meedoet aan onze wedstrijd! Upload jouw foto van (1 van) de kunstwerken en maak kans op 1 van onze mooie
+            prijzen. Mede mogelijk gemaakt door onze fantastische sponsors.
+          </p>
+          <p>
+            <strong>Vergeet zeker ook niet jouw contactgegevens achter te laten.</strong>
+          </p>
+          <p className="event-info">De uitreiking van de prijzen vindt plaats om XX uur @de afsprong (Afsneedorp 22)</p>
+        </div>
+        {serverStatus === "offline" && (
+          <div className="error">⚠️ Kan geen verbinding maken met de server op {apiUrl}. Zorg dat de server actief is.</div>
+        )}
+        {serverStatus === "checking" && <div className="status">Serververbinding controleren...</div>}
 
-      <div className="disclaimer" style={{ fontStyle: "italic", marginTop: "1rem", textAlign: "center" }}>
-        <small>
-          Jouw contactgegevens worden enkel verzameld in functie van de prijsuitreiking van deze fotowedstrijd. Jouw e-mailadres
-          wordt niet bewaard, niet gedeeld noch gebruikt voor commerciële doeleinden. Door mee te doen aan de wedstrijd ga je ermee
-          akkoord jouw e-mailadres met ons te delen, in het kader van deze fotowedstrijd.
-        </small>
-      </div>
-    </form>
+        <div className="field contact-fields">
+          <label className="field-inline">
+            <span className="label">Naam</span>
+            <input
+              type="text"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Jouw volledige naam"
+              required
+            />
+          </label>
+
+          <label className="field-inline">
+            <span className="label">E-mail</span>
+            <input
+              name="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="jij@voorbeeld.be"
+              required
+            />
+          </label>
+        </div>
+
+        <div className="field file-field">
+          <span className="label">Foto</span>
+          <div className="input-mode-buttons">
+            <button type="button" className={`mode-button ${inputMode === "camera" ? "active" : ""}`} onClick={handleCameraClick}>
+              📷 Gebruik Camera
+            </button>
+            <button type="button" className={`mode-button ${inputMode === "gallery" ? "active" : ""}`} onClick={handleGalleryClick}>
+              🖼️ Kies uit Galerij
+            </button>
+          </div>
+          {/* Hidden file inputs that are triggered programmatically */}
+          <input
+            ref={cameraInputRef}
+            name="photo-camera"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => handleFileChange(e, "camera")}
+            style={{ display: "none" }}
+          />
+          <input
+            ref={galleryInputRef}
+            name="photo-gallery"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => handleFileChange(e, "gallery")}
+            style={{ display: "none" }}
+          />
+          <small className="hint">
+            Max 10MB per foto. {inputMode === "gallery" ? `Tot ${MAX_FILES} foto's.` : ""}
+            {files.length > 0 ? ` Geselecteerd: ${files.length} foto${files.length > 1 ? "'s" : ""}` : ""}
+          </small>
+        </div>
+
+        {previews.length > 0 && (
+          <div className="preview-container">
+            {previews.map((preview, index) => (
+              <div key={index} className="preview">
+                <img src={preview.url} alt={`preview ${index + 1}`} />
+                <small className="preview-name">{preview.name}</small>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {uploadProgress && <div className="upload-progress">{uploadProgress}</div>}
+        {error && <div className="error">{error}</div>}
+        {status && <div className="status">{status}</div>}
+
+        <button className="submit" type="submit" disabled={submitting}>
+          {submitting ? "Uploaden…" : "Verzenden"}
+        </button>
+
+        <div className="disclaimer" style={{ fontStyle: "italic", marginTop: "1rem", textAlign: "center" }}>
+          <small>
+            Jouw contactgegevens worden enkel verzameld in functie van de prijsuitreiking van deze fotowedstrijd. Jouw e-mailadres
+            wordt niet bewaard, niet gedeeld noch gebruikt voor commerciële doeleinden. Door mee te doen aan de wedstrijd ga je
+            ermee akkoord jouw e-mailadres met ons te delen, in het kader van deze fotowedstrijd.
+          </small>
+        </div>
+      </form>
+    </>
   );
 }
