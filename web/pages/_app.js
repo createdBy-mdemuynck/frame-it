@@ -11,6 +11,10 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Head>
+        <title>Fotowedstrijd TransformArt</title>
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Upload jouw foto en maak kans op mooie prijzen!" />
         <script
           dangerouslySetInnerHTML={{
             __html: `window.__ENV__ = ${JSON.stringify(runtimeConfig)};`,

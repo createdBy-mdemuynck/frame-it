@@ -97,7 +97,7 @@ export default function UploadForm() {
 
     // Validate number of files
     if (fileArray.length > maxAllowed) {
-      setError(`You can only upload up to ${maxAllowed} photo${maxAllowed > 1 ? "s" : ""} at a time.`);
+      setError(`Je kan maximaal ${maxAllowed} foto${maxAllowed > 1 ? "'s" : ""} tegelijk uploaden.`);
       setFiles([]);
       setPreviews([]);
       return;
@@ -109,9 +109,9 @@ export default function UploadForm() {
 
     fileArray.forEach((file, index) => {
       if (file.size > MAX_FILE_SIZE) {
-        errors.push(`"${file.name}" is too large (max 10MB)`);
+        errors.push(`"${file.name}" is te groot (max 10MB)`);
       } else if (!file.type.startsWith("image/")) {
-        errors.push(`"${file.name}" is not an image file`);
+        errors.push(`"${file.name}" is geen afbeeldingsbestand`);
       } else {
         validFiles.push(file);
       }
@@ -147,31 +147,31 @@ export default function UploadForm() {
   async function handleAutoSubmit(cameraFile) {
     // Validate name and email before auto-submitting
     if (!name.trim()) {
-      setError("Please enter your name before taking a photo.");
+      setError("Vul je naam in voordat je een foto neemt.");
       setFiles([]);
       setPreviews([]);
       return;
     }
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email before taking a photo.");
+      setError("Vul een geldig e-mailadres in voordat je een foto neemt.");
       setFiles([]);
       setPreviews([]);
       return;
     }
 
     setSubmitting(true);
-    setUploadProgress("Uploading photo...");
+    setUploadProgress("Foto uploaden...");
 
     try {
       const success = await uploadSingleFile(cameraFile);
       if (success) {
-        setStatus("Photo uploaded successfully!");
+        setStatus("Foto succesvol geüpload!");
         setFiles([]);
         setPreviews([]);
         setInputMode(null);
       }
     } catch (err) {
-      setError("Upload failed: " + (err.message || err));
+      setError("Upload mislukt: " + (err.message || err));
     } finally {
       setSubmitting(false);
       setUploadProgress(null);
@@ -200,24 +200,24 @@ export default function UploadForm() {
 
   function validate() {
     if (!name.trim()) {
-      setError("Name is required.");
+      setError("Naam is verplicht.");
       return false;
     }
     if (!email.trim()) {
-      setError("Email is required.");
+      setError("E-mail is verplicht.");
       return false;
     }
     // simple email check
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address.");
+      setError("Vul een geldig e-mailadres in.");
       return false;
     }
     if (!inputMode) {
-      setError("Please choose to use camera or gallery.");
+      setError("Kies camera of galerij.");
       return false;
     }
     if (files.length === 0) {
-      setError("Please attach at least one photo.");
+      setError("Voeg minstens één foto toe.");
       return false;
     }
     return true;
@@ -242,10 +242,10 @@ export default function UploadForm() {
 
       // Check if we got an HTML response (wrong server)
       if (txt.includes("<!DOCTYPE html>") || txt.includes("<html>")) {
-        throw new Error("Upload went to wrong server. Make sure backend is running on port 3001.");
+        throw new Error("Upload ging naar de verkeerde server. Zorg dat de backend draait op poort 3001.");
       }
 
-      throw new Error(txt || "Upload failed");
+      throw new Error(txt || "Upload mislukt");
     }
 
     const data = await res.json();
@@ -267,7 +267,7 @@ export default function UploadForm() {
       // Upload files sequentially
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        setUploadProgress(`Uploading ${i + 1} of ${totalFiles}...`);
+        setUploadProgress(`Uploaden ${i + 1} van ${totalFiles}...`);
 
         try {
           const success = await uploadSingleFile(file);
@@ -284,18 +284,18 @@ export default function UploadForm() {
 
       // Show results
       if (successCount === totalFiles) {
-        setStatus(`All ${totalFiles} photo${totalFiles > 1 ? "s" : ""} uploaded successfully!`);
+        setStatus(`Alle ${totalFiles} foto${totalFiles > 1 ? "'s" : ""} succesvol geüpload!`);
         setFiles([]);
         setPreviews([]);
         setInputMode(null);
       } else if (successCount > 0) {
-        setStatus(`${successCount} of ${totalFiles} photos uploaded successfully.`);
-        setError(`Failed to upload: ${failedFiles.join(", ")}`);
+        setStatus(`${successCount} van ${totalFiles} foto's succesvol geüpload.`);
+        setError(`Upload mislukt voor: ${failedFiles.join(", ")}`);
       } else {
-        setError(`Failed to upload all photos: ${failedFiles.join(", ")}`);
+        setError(`Upload mislukt voor alle foto's: ${failedFiles.join(", ")}`);
       }
     } catch (err) {
-      setError("Upload error: " + (err.message || err));
+      setError("Upload fout: " + (err.message || err));
     } finally {
       setSubmitting(false);
       setUploadProgress(null);
@@ -304,38 +304,61 @@ export default function UploadForm() {
 
   return (
     <form className="upload-form" onSubmit={handleSubmit} noValidate>
-      <h1 className="title">Send a Photo</h1>
+      <div className="logo-container">
+        <div className="logo-title-left">Fotowedstrijd</div>
+        <img src="/logo.png?v=2" alt="Transformart" className="logo" />
+        <div className="logo-title-right">TransformArt</div>
+      </div>
 
+      <div className="intro-text">
+        <p>
+          Fijn dat je meedoet aan onze wedstrijd! Upload jouw foto van (1 van) de kunstwerken en maak kans op 1 van onze mooie
+          prijzen. Mede mogelijk gemaakt door onze fantastische sponsors.
+        </p>
+        <p>
+          <strong>Vergeet zeker ook niet jouw contactgegevens achter te laten.</strong>
+        </p>
+        <p className="event-info">De uitreiking van de prijzen vindt plaats om XX uur @de afsprong (Afsneedorp 22)</p>
+      </div>
       {serverStatus === "offline" && (
-        <div className="error">⚠️ Cannot connect to server at {apiUrl}. Make sure the server is running.</div>
+        <div className="error">⚠️ Kan geen verbinding maken met de server op {apiUrl}. Zorg dat de server actief is.</div>
       )}
-      {serverStatus === "checking" && <div className="status">Checking server connection...</div>}
+      {serverStatus === "checking" && <div className="status">Serververbinding controleren...</div>}
 
-      <label className="field">
-        <span className="label">Name</span>
-        <input name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" required />
-      </label>
+      <div className="field contact-fields">
+        <label className="field-inline">
+          <span className="label">Naam</span>
+          <input 
+            type="text"
+            name="name" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            placeholder="Jouw volledige naam" 
+            required 
+          />
+        </label>
 
-      <label className="field">
-        <span className="label">Email</span>
-        <input
-          name="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          required
-        />
-      </label>
+        <label className="field-inline">
+          <span className="label">E-mail</span>
+          <input
+            name="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="jij@voorbeeld.be"
+            required
+          />
+        </label>
+      </div>
 
       <div className="field file-field">
-        <span className="label">Photo</span>
+        <span className="label">Foto</span>
         <div className="input-mode-buttons">
           <button type="button" className={`mode-button ${inputMode === "camera" ? "active" : ""}`} onClick={handleCameraClick}>
-            📷 Use Camera
+            📷 Gebruik Camera
           </button>
           <button type="button" className={`mode-button ${inputMode === "gallery" ? "active" : ""}`} onClick={handleGalleryClick}>
-            🖼️ Choose from Gallery
+            🖼️ Kies uit Galerij
           </button>
         </div>
         {/* Hidden file inputs that are triggered programmatically */}
@@ -358,8 +381,8 @@ export default function UploadForm() {
           style={{ display: "none" }}
         />
         <small className="hint">
-          Max 10MB per photo. {inputMode === "gallery" ? `Up to ${MAX_FILES} photos.` : ""}
-          {files.length > 0 ? ` Selected: ${files.length} photo${files.length > 1 ? "s" : ""}` : ""}
+          Max 10MB per foto. {inputMode === "gallery" ? `Tot ${MAX_FILES} foto's.` : ""}
+          {files.length > 0 ? ` Geselecteerd: ${files.length} foto${files.length > 1 ? "'s" : ""}` : ""}
         </small>
       </div>
 
@@ -379,8 +402,16 @@ export default function UploadForm() {
       {status && <div className="status">{status}</div>}
 
       <button className="submit" type="submit" disabled={submitting}>
-        {submitting ? "Uploading…" : "Submit"}
+        {submitting ? "Uploaden…" : "Verzenden"}
       </button>
+
+      <div className="disclaimer" style={{ fontStyle: "italic", marginTop: "1rem", textAlign: "center" }}>
+        <small>
+          Jouw contactgegevens worden enkel verzameld in functie van de prijsuitreiking van deze fotowedstrijd. Jouw e-mailadres
+          wordt niet bewaard, niet gedeeld noch gebruikt voor commerciële doeleinden. Door mee te doen aan de wedstrijd ga je ermee
+          akkoord jouw e-mailadres met ons te delen, in het kader van deze fotowedstrijd.
+        </small>
+      </div>
     </form>
   );
 }
