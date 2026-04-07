@@ -1,6 +1,7 @@
 # Admin Workflow Test Skeleton
 
 Files:
+
 - tests/integration/admin/login-persistence.test.ts (P1)
 
 ## Skeleton: login-persistence.test.ts
@@ -10,6 +11,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 ### Test Scenarios:
 
 #### 1. localStorage save after successful login
+
 - Steps:
   1. Clear localStorage
   2. Submit valid admin credentials (email + password)
@@ -19,6 +21,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 - Priority: P1
 
 #### 2. Auto-fill email on page reload
+
 - Steps:
   1. Set localStorage 'adminEmail' to 'test.admin@example.com'
   2. Load/reload login page
@@ -28,6 +31,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 - Priority: P1
 
 #### 3. User can override auto-filled email
+
 - Steps:
   1. Set localStorage 'adminEmail' to 'old.admin@example.com'
   2. Load login page (email auto-filled)
@@ -39,6 +43,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 - Priority: P1
 
 #### 4. Empty email not saved to localStorage
+
 - Steps:
   1. Set localStorage 'adminEmail' to 'existing@example.com'
   2. Load login page
@@ -49,6 +54,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 - Priority: P2
 
 #### 5. Invalid email format not saved
+
 - Steps:
   1. Clear localStorage
   2. Submit login with invalid email format (e.g., 'not-an-email')
@@ -58,6 +64,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 - Priority: P2
 
 #### 6. localStorage unavailable (privacy/incognito mode)
+
 - Steps:
   1. Mock localStorage to throw error or return null (simulate privacy mode)
   2. Load login page
@@ -69,6 +76,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 - Priority: P2
 
 #### 7. Multiple admin users on same device
+
 - Steps:
   1. Login as 'admin1@example.com' (saved to localStorage)
   2. Logout
@@ -80,6 +88,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 - Priority: P2
 
 #### 8. localStorage cleared by user
+
 - Steps:
   1. Set localStorage 'adminEmail' to 'test@example.com'
   2. Manually clear browser localStorage (user action via DevTools)
@@ -91,6 +100,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 - Priority: P3
 
 #### 9. XSS protection - malicious email in localStorage
+
 - Steps:
   1. Manually inject malicious value to localStorage: `<script>alert('xss')</script>`
   2. Load login page
@@ -100,6 +110,7 @@ Tests for admin login localStorage persistence feature (remembering last used em
 - Priority: P1
 
 #### 10. Session vs localStorage boundary
+
 - Steps:
   1. Login successfully (email saved to localStorage)
   2. Close browser tab/window (session ends)

@@ -89,7 +89,7 @@
 
     <script>
       // Load saved email on page load
-      const savedEmail = localStorage.getItem('adminEmail');
+      const savedEmail = localStorage.getItem("adminEmail");
       if (savedEmail) {
         document.getElementById("email").value = savedEmail;
       }
@@ -111,7 +111,7 @@
 
           if (data.success) {
             // Save email to localStorage for next login
-            localStorage.setItem('adminEmail', email);
+            localStorage.setItem("adminEmail", email);
             window.location.href = "/gallery";
           } else {
             errorDiv.textContent = data.error || "Login failed";

@@ -63,10 +63,7 @@ Seeded at team creation.
 - **Root cause**: Thumbnail generation is asynchronous (setImmediate) and errors are only logged, not surfaced
 - **Scope**: Fix thumbnail generation reliability, improve error handling, ensure thumbnails created for all uploads
 - **Coordination**: Calypso creating automated tests for regression prevention
-- **Status**: In progress - investigating thumbnail generation pipeline
-  6. Added per-file status reporting in response (success/failure details for each file)
-  7. Implemented partial success handling: accepts all valid files even if some fail
-  8. Added random milliseconds to timestamp to prevent filename collisions in batch uploads
+- **Status**: In progress - investigating thumbnail generation pipeline 6. Added per-file status reporting in response (success/failure details for each file) 7. Implemented partial success handling: accepts all valid files even if some fail 8. Added random milliseconds to timestamp to prevent filename collisions in batch uploads
 
 - **Response format**:
   - Success: `{ success: true, message: "X file(s) uploaded successfully", uploaded: X, failed: Y, results: [...] }`
@@ -134,7 +131,7 @@ Seeded at team creation.
   1. On page load: Check localStorage for 'adminEmail' key and populate email input field if present
   2. On successful login: Save email to localStorage before redirecting to gallery
   3. Client-side only: No server-side changes needed (session auth via req.session.adminEmail remains unchanged)
-- **Key learning**: 
+- **Key learning**:
   - localStorage provides simple client-side persistence for UX improvements without backend changes
   - Auto-fill on page load improves admin workflow for repeat logins
   - Implementation is browser-specific (localStorage is per-origin), so admins using multiple browsers/devices won't share the saved email (acceptable trade-off)
@@ -153,4 +150,3 @@ Seeded at team creation.
   4. XSS protection: Escape values before rendering
 - **Coordination**: Calypso creating test coverage for localStorage save, auto-fill, override, edge cases
 - **Status**: Assigned
-
