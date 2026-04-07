@@ -88,6 +88,12 @@
     </div>
 
     <script>
+      // Load saved email on page load
+      const savedEmail = localStorage.getItem('adminEmail');
+      if (savedEmail) {
+        document.getElementById("email").value = savedEmail;
+      }
+
       document.getElementById("loginForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const email = document.getElementById("email").value;
@@ -104,6 +110,8 @@
           const data = await res.json();
 
           if (data.success) {
+            // Save email to localStorage for next login
+            localStorage.setItem('adminEmail', email);
             window.location.href = "/gallery";
           } else {
             errorDiv.textContent = data.error || "Login failed";

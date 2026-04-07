@@ -83,7 +83,13 @@ Scenarios (mapped to Jest files):
 - File: tests/integration/jury/concurrent-verdicts.test.ts
 - Description: Concurrent conflicting votes; assert deterministic aggregation.
 
-12. Large payload streaming (P3)
+12. Admin login localStorage persistence (P1)
+
+- File: tests/integration/admin/login-persistence.test.ts
+- Description: Verify admin login remembers last used email via localStorage. Tests auto-fill on reload, override capability, empty/invalid email handling, localStorage unavailable (privacy mode), XSS protection, session vs localStorage boundary. See test-skeletons/admin-workflow.md for 10 detailed test scenarios.
+- Rationale: UX improvement - reduce friction for returning admin/jury users. Security critical: ensure passwords never stored, localStorage values properly escaped.
+
+13. Large payload streaming (P3)
 
 - File: tests/integration/upload/streaming.test.ts
 - Description: If supported, stream large images and assert memory usage behavior and acceptance/rejection.
@@ -97,7 +103,7 @@ Cross-cutting fixtures & mocks:
 - Mocks: storage adapters (local, s3), auth token provider, rate limiter hook, DB transactions, event bus/jury queue, Sharp thumbnail generation (for failure testing)
   camera-mode, batch-upload, thumbnail-generation, size-limits, unsupported-type, auth, jury end-to-end
 
-2. P1 files: concurrent-uploads, corrupted-image, rate-limit, storage-failure, consistency-transaction
+2. P1 files: concurrent-uploads, corrupted-image, rate-limit, storage-failure, consistency-transaction, admin login-persistence
 3. P2 files: concurrent-verdicts, dedup/duplicate-upload rules
 4. P3 files: streaming, very-large payloads
 

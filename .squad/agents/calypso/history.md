@@ -97,3 +97,74 @@ Seeded at team creation.
 - Thumbnail tests must pass on all upload-related PRs
 - Run tests when changes touch: upload.js, package.json, Docker config
 - Alert on thumbnail error rate > 5% in production logs
+
+## Learnings (2026-04-07 - Admin Login localStorage Persistence)
+
+- **NEW FEATURE:** Admin login will remember last used email via localStorage
+- Created comprehensive test coverage: `tests/test-skeletons/admin-workflow.md` (10 test scenarios, P1 priority)
+- Updated `tests/automation-plan.md` to include login-persistence.test.ts as P1
+- Created decision document: `.squad/decisions/inbox/calypso-admin-login-persistence.md`
+
+**Test Coverage Created:**
+
+1. localStorage save after successful login (P1)
+2. Auto-fill email on page reload (P1) - password field always empty
+3. User can override auto-filled email (P1)
+4. Empty email not saved (P2)
+5. Invalid email format not saved (P2)
+6. localStorage unavailable/privacy mode - graceful degradation (P2)
+7. Multiple admin users on same device (P2)
+8. localStorage cleared by user - respect user action (P3)
+9. XSS protection - escape localStorage values (P1)
+10. Session vs localStorage boundary - email persists, auth doesn't (P2)
+
+**Key Security Requirements:**
+
+- NEVER store passwords in localStorage
+- Escape/sanitize all localStorage values before rendering in input fields
+- Wrap localStorage access in try-catch for quota/privacy errors
+- Validate email format before saving
+- Consider adding "Remember me" checkbox for explicit user consent
+
+**Implementation Details:**
+
+- Storage key: 'adminEmail' or 'lastAdminLogin' (coordinate with Astra)
+- Test across browsers: Chrome, Firefox, Safari, Edge
+- Test on mobile: iOS Safari, Chrome Mobile
+- Accessibility: Ensure auto-fill works with screen readers and keyboard navigation
+
+**Coordination Required:**
+
+- **Astra**: Frontend implementation (login page, localStorage integration)
+- **Scribe**: Security/privacy policy decisions, GDPR considerations, user consent model
+- **Daedalus**: Jest test implementation when ready to automate
+
+**Open Questions for Scribe:**
+
+1. Explicit user consent checkbox vs implied consent?
+2. Email expiration after X days of inactivity?
+3. GDPR/privacy considerations for storing email in localStorage?
+4. Analytics tracking for localStorage availability/usage?
+
+**Rationale:**
+
+- UX improvement: Reduce friction for returning admin/jury users
+- Common pattern: Standard in many admin systems
+- Privacy compliant: Email is non-sensitive, client-controlled, user can clear
+- Security compliant: Passwords never stored, only email address
+
+## Orchestration Entry - 2026-04-07T08:54:26Z
+
+- Calypso: Assigned to add test cases for login persistence (localStorage save, auto-fill, override, edge cases).
+- **Session**: login-persistence
+- **Scope**: Create comprehensive test coverage for email localStorage persistence
+- **Requirements**:
+  1. Test localStorage save after successful login
+  2. Test auto-fill on page reload
+  3. Test user override of auto-filled email
+  4. Test edge cases: empty email, invalid format, localStorage unavailable, privacy mode
+  5. Test XSS protection and escaping
+  6. Test security boundary: email persists, password never stored
+- **Priority**: P1 for core happy path, P2 for edge cases
+- **Coordination**: Awaiting Orion's implementation in login.ejs
+- **Status**: Assigned
