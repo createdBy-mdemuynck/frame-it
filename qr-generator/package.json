@@ -1,0 +1,21 @@
+{
+  "name": "transformart-qr-generator",
+  "version": "1.0.0",
+  "description": "QR Code generator with TransformArt logo embedding",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -o",
+    "dev": "npx http-server -p 8080 -o"
+  },
+  "keywords": [
+    "qr-code",
+    "generator",
+    "transformart",
+    "logo"
+  ],
+  "author": "TransformArt",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
