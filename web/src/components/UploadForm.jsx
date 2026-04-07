@@ -328,13 +328,13 @@ export default function UploadForm() {
       <div className="field contact-fields">
         <label className="field-inline">
           <span className="label">Naam</span>
-          <input 
+          <input
             type="text"
-            name="name" 
-            value={name} 
-            onChange={(e) => setName(e.target.value)} 
-            placeholder="Jouw volledige naam" 
-            required 
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Jouw volledige naam"
+            required
           />
         </label>
 
