@@ -14,6 +14,7 @@ A simple, standalone web app to generate QR codes with the TransformArt logo emb
 ## How to Use
 
 ### Option 1: Open Directly in Browser
+
 1. Simply open `index.html` in any modern web browser
 2. Enter your text or URL
 3. Customize the appearance (size, colors, logo size)
@@ -21,6 +22,7 @@ A simple, standalone web app to generate QR codes with the TransformArt logo emb
 5. Download the generated QR code
 
 ### Option 2: Run with a Local Server
+
 If you prefer to run it with a local server:
 
 ```bash
@@ -54,6 +56,7 @@ Then open your browser to `http://localhost:8080`
 ## Browser Compatibility
 
 Works in all modern browsers:
+
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
@@ -68,6 +71,7 @@ Works in all modern browsers:
 ## Examples
 
 Common use cases:
+
 - Event registration links
 - Product information pages
 - Social media profiles

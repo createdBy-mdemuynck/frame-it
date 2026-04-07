@@ -1,339 +1,341 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TransformArt QR Code Generator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
 
+      .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 600px;
+        width: 100%;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .header img {
+        max-width: 150px;
+        height: auto;
+        margin-bottom: 15px;
+      }
+
+      .header h1 {
+        color: #333;
+        font-size: 28px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .input-group {
+        margin-bottom: 25px;
+      }
+
+      .input-group label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 25px;
+      }
+
+      .option-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .option-group label {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .option-group input[type="number"],
+      .option-group input[type="color"] {
+        padding: 8px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      .btn-generate {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-generate:active {
+        transform: translateY(0);
+      }
+
+      .result {
+        margin-top: 30px;
+        text-align: center;
+        display: none;
+      }
+
+      .result.show {
+        display: block;
+      }
+
+      #qrCanvas {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .btn-download {
+        padding: 12px 30px;
+        background: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .btn-download:hover {
+        background: #45a049;
+      }
+
+      @media (max-width: 600px) {
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header img {
-            max-width: 150px;
-            height: auto;
-            margin-bottom: 15px;
-        }
-
-        .header h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .input-group {
-            margin-bottom: 25px;
-        }
-
-        .input-group label {
-            display: block;
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
+          padding: 25px;
         }
 
         .options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
+          grid-template-columns: 1fr;
         }
 
-        .option-group {
-            display: flex;
-            flex-direction: column;
+        .header h1 {
+          font-size: 24px;
         }
-
-        .option-group label {
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-
-        .option-group input[type="number"],
-        .option-group input[type="color"] {
-            padding: 8px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .btn-generate {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .btn-generate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-generate:active {
-            transform: translateY(0);
-        }
-
-        .result {
-            margin-top: 30px;
-            text-align: center;
-            display: none;
-        }
-
-        .result.show {
-            display: block;
-        }
-
-        #qrCanvas {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .btn-download {
-            padding: 12px 30px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-download:hover {
-            background: #45a049;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 25px;
-            }
-
-            .options {
-                grid-template-columns: 1fr;
-            }
-
-            .header h1 {
-                font-size: 24px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <img src="logo.png" alt="TransformArt" id="logoImage">
-            <h1>QR Code Generator</h1>
-            <p>Create QR codes with the TransformArt logo</p>
-        </div>
+      <div class="header">
+        <img src="logo.png" alt="TransformArt" id="logoImage" />
+        <h1>QR Code Generator</h1>
+        <p>Create QR codes with the TransformArt logo</p>
+      </div>
 
-        <div class="input-group">
-            <label for="textInput">Enter text or URL:</label>
-            <input type="text" id="textInput" placeholder="https://example.com or any text" value="https://transformart.be">
-        </div>
+      <div class="input-group">
+        <label for="textInput">Enter text or URL:</label>
+        <input type="text" id="textInput" placeholder="https://example.com or any text" value="https://transformart.be" />
+      </div>
 
-        <div class="options">
-            <div class="option-group">
-                <label for="qrSize">QR Code Size:</label>
-                <input type="number" id="qrSize" min="200" max="1000" value="400" step="50">
-            </div>
-            <div class="option-group">
-                <label for="qrColor">QR Color:</label>
-                <input type="color" id="qrColor" value="#000000">
-            </div>
-            <div class="option-group">
-                <label for="bgColor">Background Color:</label>
-                <input type="color" id="bgColor" value="#ffffff">
-            </div>
-            <div class="option-group">
-                <label for="logoSize">Logo Size (%):</label>
-                <input type="number" id="logoSize" min="10" max="40" value="20" step="5">
-            </div>
+      <div class="options">
+        <div class="option-group">
+          <label for="qrSize">QR Code Size:</label>
+          <input type="number" id="qrSize" min="200" max="1000" value="400" step="50" />
         </div>
-
-        <button class="btn-generate" onclick="generateQR()">Generate QR Code</button>
-
-        <div class="result" id="result">
-            <canvas id="qrCanvas"></canvas>
-            <button class="btn-download" onclick="downloadQR()">Download QR Code</button>
+        <div class="option-group">
+          <label for="qrColor">QR Color:</label>
+          <input type="color" id="qrColor" value="#000000" />
         </div>
+        <div class="option-group">
+          <label for="bgColor">Background Color:</label>
+          <input type="color" id="bgColor" value="#ffffff" />
+        </div>
+        <div class="option-group">
+          <label for="logoSize">Logo Size (%):</label>
+          <input type="number" id="logoSize" min="10" max="40" value="20" step="5" />
+        </div>
+      </div>
+
+      <button class="btn-generate" onclick="generateQR()">Generate QR Code</button>
+
+      <div class="result" id="result">
+        <canvas id="qrCanvas"></canvas>
+        <button class="btn-download" onclick="downloadQR()">Download QR Code</button>
+      </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
     <script>
-        let logoImg = null;
-        let logoLoaded = false;
-        
-        // Preload logo image
-        function loadLogo() {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = function() {
-                    logoImg = img;
-                    logoLoaded = true;
-                    console.log('Logo loaded successfully');
-                    resolve(img);
-                };
-                img.onerror = function() {
-                    console.warn('Logo failed to load, will generate QR without logo');
-                    logoLoaded = false;
-                    resolve(null); // Resolve anyway, we'll generate without logo
-                };
-                img.src = 'logo.png';
-            });
-        }
-        
-        // Load logo on page load
-        window.addEventListener('DOMContentLoaded', loadLogo);
+      let logoImg = null;
+      let logoLoaded = false;
 
-        function generateQR() {
-            const text = document.getElementById('textInput').value;
-            const size = parseInt(document.getElementById('qrSize').value);
-            const qrColor = document.getElementById('qrColor').value;
-            const bgColor = document.getElementById('bgColor').value;
-            const logoSizePercent = parseInt(document.getElementById('logoSize').value);
-
-            if (!text) {
-                alert('Please enter text or URL');
-                return;
-            }
-
-            const canvas = document.getElementById('qrCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Set canvas size
-            canvas.width = size;
-            canvas.height = size;
-            
-            // Generate QR code using qrcode-generator library
-            try {
-                // Create QR code
-                const qr = qrcode(0, 'H'); // Type 0 (auto), Error correction level H
-                qr.addData(text);
-                qr.make();
-                
-                const moduleCount = qr.getModuleCount();
-                const cellSize = size / moduleCount;
-                
-                // Fill background
-                ctx.fillStyle = bgColor;
-                ctx.fillRect(0, 0, size, size);
-                
-                // Draw QR code
-                ctx.fillStyle = qrColor;
-                for (let row = 0; row < moduleCount; row++) {
-                    for (let col = 0; col < moduleCount; col++) {
-                        if (qr.isDark(row, col)) {
-                            ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-                        }
-                    }
-                }
-                
-                // Add logo in the center (if loaded)
-                if (logoLoaded && logoImg) {
-                    const logoSize = (size * logoSizePercent) / 100;
-                    const x = (size - logoSize) / 2;
-                    const y = (size - logoSize) / 2;
-
-                    // Draw circle background for logo
-                    ctx.fillStyle = bgColor;
-                    ctx.beginPath();
-                    ctx.arc(size / 2, size / 2, logoSize / 2 + 10, 0, 2 * Math.PI);
-                    ctx.fill();
-
-                    // Draw logo
-                    try {
-                        ctx.drawImage(logoImg, x, y, logoSize, logoSize);
-                    } catch (e) {
-                        console.warn('Failed to draw logo, continuing without it:', e);
-                    }
-                } else {
-                    console.log('QR generated without logo');
-                }
-
-                // Show result
-                document.getElementById('result').classList.add('show');
-            } catch (err) {
-                console.error('QR Generation Error:', err);
-                alert('Error generating QR code: ' + err.message);
-            }
-        }
-
-        function downloadQR() {
-            const canvas = document.getElementById('qrCanvas');
-            const link = document.createElement('a');
-            const text = document.getElementById('textInput').value;
-            const filename = 'transformart-qr-' + Date.now() + '.png';
-            
-            link.download = filename;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
-
-        // Allow Enter key to generate QR
-        document.getElementById('textInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                generateQR();
-            }
+      // Preload logo image
+      function loadLogo() {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = function () {
+            logoImg = img;
+            logoLoaded = true;
+            console.log("Logo loaded successfully");
+            resolve(img);
+          };
+          img.onerror = function () {
+            console.warn("Logo failed to load, will generate QR without logo");
+            logoLoaded = false;
+            resolve(null); // Resolve anyway, we'll generate without logo
+          };
+          img.src = "logo.png";
         });
+      }
+
+      // Load logo on page load
+      window.addEventListener("DOMContentLoaded", loadLogo);
+
+      function generateQR() {
+        const text = document.getElementById("textInput").value;
+        const size = parseInt(document.getElementById("qrSize").value);
+        const qrColor = document.getElementById("qrColor").value;
+        const bgColor = document.getElementById("bgColor").value;
+        const logoSizePercent = parseInt(document.getElementById("logoSize").value);
+
+        if (!text) {
+          alert("Please enter text or URL");
+          return;
+        }
+
+        const canvas = document.getElementById("qrCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Set canvas size
+        canvas.width = size;
+        canvas.height = size;
+
+        // Generate QR code using qrcode-generator library
+        try {
+          // Create QR code
+          const qr = qrcode(0, "H"); // Type 0 (auto), Error correction level H
+          qr.addData(text);
+          qr.make();
+
+          const moduleCount = qr.getModuleCount();
+          const cellSize = size / moduleCount;
+
+          // Fill background
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, size, size);
+
+          // Draw QR code
+          ctx.fillStyle = qrColor;
+          for (let row = 0; row < moduleCount; row++) {
+            for (let col = 0; col < moduleCount; col++) {
+              if (qr.isDark(row, col)) {
+                ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+              }
+            }
+          }
+
+          // Add logo in the center (if loaded)
+          if (logoLoaded && logoImg) {
+            const logoSize = (size * logoSizePercent) / 100;
+            const x = (size - logoSize) / 2;
+            const y = (size - logoSize) / 2;
+
+            // Draw circle background for logo
+            ctx.fillStyle = bgColor;
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, logoSize / 2 + 10, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Draw logo
+            try {
+              ctx.drawImage(logoImg, x, y, logoSize, logoSize);
+            } catch (e) {
+              console.warn("Failed to draw logo, continuing without it:", e);
+            }
+          } else {
+            console.log("QR generated without logo");
+          }
+
+          // Show result
+          document.getElementById("result").classList.add("show");
+        } catch (err) {
+          console.error("QR Generation Error:", err);
+          alert("Error generating QR code: " + err.message);
+        }
+      }
+
+      function downloadQR() {
+        const canvas = document.getElementById("qrCanvas");
+        const link = document.createElement("a");
+        const text = document.getElementById("textInput").value;
+        const filename = "transformart-qr-" + Date.now() + ".png";
+
+        link.download = filename;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }
+
+      // Allow Enter key to generate QR
+      document.getElementById("textInput").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          generateQR();
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
