@@ -1,6 +1,13 @@
-docs(squad): Add orchestration and session logs
+chore(squad): orchestrate multi-upload feature assignments
 
-- Created orchestration-log/2026-04-03T00-00-00Z-orion.md
-- Created log/2026-04-03T00-00-00Z-azure-storage-fix.md
+- Created orchestration logs for Astra, Orion, Calypso
+- Logged multi-upload feature session
+- Updated agent histories with new assignments
+- Summarized Orion history.md (reduced from 12KB to 5KB)
+
+Feature scope: multi-file upload (up to 10 files, 10MB per file)
+- Astra: UploadForm.jsx UI updates
+- Orion: upload.js endpoint batch processing
+- Calypso: test coverage for validation and edge cases
 
 Completed by: Scribe

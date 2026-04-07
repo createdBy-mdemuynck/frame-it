@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILES = 10;
 
 export default function UploadForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [files, setFiles] = useState([]); // Changed from single file to array
+  const [previews, setPreviews] = useState([]); // Changed to array for multiple previews
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null); // Track upload progress
   const [inputMode, setInputMode] = useState(null); // 'camera' or 'gallery'
   const [serverStatus, setServerStatus] = useState("checking");
   const [apiUrl, setApiUrl] = useState("http://localhost:3001"); // Default
@@ -77,22 +79,103 @@ export default function UploadForm() {
     setStatus("");
   }
 
-  function handleFileChange(e) {
+  function handleFileChange(e, mode) {
     resetMessages();
-    const f = e.target.files && e.target.files[0];
-    if (!f) {
-      setFile(null);
-      setPreview(null);
+    const selectedFiles = e.target.files;
+
+    if (!selectedFiles || selectedFiles.length === 0) {
+      setFiles([]);
+      setPreviews([]);
       return;
     }
-    if (f.size > MAX_FILE_SIZE) {
-      setError("Photo is too large. Max size is 5MB.");
-      setFile(null);
-      setPreview(null);
+
+    // Convert FileList to Array
+    const fileArray = Array.from(selectedFiles);
+
+    // For camera mode, only allow 1 file
+    const maxAllowed = mode === "camera" ? 1 : MAX_FILES;
+
+    // Validate number of files
+    if (fileArray.length > maxAllowed) {
+      setError(`You can only upload up to ${maxAllowed} photo${maxAllowed > 1 ? "s" : ""} at a time.`);
+      setFiles([]);
+      setPreviews([]);
       return;
     }
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
+
+    // Validate each file size and type
+    const validFiles = [];
+    const errors = [];
+
+    fileArray.forEach((file, index) => {
+      if (file.size > MAX_FILE_SIZE) {
+        errors.push(`"${file.name}" is too large (max 10MB)`);
+      } else if (!file.type.startsWith("image/")) {
+        errors.push(`"${file.name}" is not an image file`);
+      } else {
+        validFiles.push(file);
+      }
+    });
+
+    if (errors.length > 0) {
+      setError(errors.join(", "));
+      if (validFiles.length === 0) {
+        setFiles([]);
+        setPreviews([]);
+        return;
+      }
+    }
+
+    // Set valid files and create previews
+    setFiles(validFiles);
+    const newPreviews = validFiles.map((file) => ({
+      url: URL.createObjectURL(file),
+      name: file.name,
+    }));
+    setPreviews(newPreviews);
+
+    // Auto-submit for camera mode
+    if (mode === "camera" && validFiles.length > 0) {
+      // Small delay to ensure state updates and user sees preview
+      setTimeout(() => {
+        handleAutoSubmit(validFiles[0]);
+      }, 300);
+    }
+  }
+
+  // Auto-submit function for camera mode
+  async function handleAutoSubmit(cameraFile) {
+    // Validate name and email before auto-submitting
+    if (!name.trim()) {
+      setError("Please enter your name before taking a photo.");
+      setFiles([]);
+      setPreviews([]);
+      return;
+    }
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email before taking a photo.");
+      setFiles([]);
+      setPreviews([]);
+      return;
+    }
+
+    setSubmitting(true);
+    setUploadProgress("Uploading photo...");
+
+    try {
+      const success = await uploadSingleFile(cameraFile);
+      if (success) {
+        setStatus("Photo uploaded successfully!");
+        setFiles([]);
+        setPreviews([]);
+        setInputMode(null);
+      }
+    } catch (err) {
+      setError("Upload failed: " + (err.message || err));
+    } finally {
+      setSubmitting(false);
+      setUploadProgress(null);
+    }
   }
 
   function handleCameraClick() {
@@ -133,61 +216,89 @@ export default function UploadForm() {
       setError("Please choose to use camera or gallery.");
       return false;
     }
-    if (!file) {
-      setError("Please attach a photo.");
+    if (files.length === 0) {
+      setError("Please attach at least one photo.");
       return false;
     }
     return true;
+  }
+
+  // Upload a single file to the backend
+  async function uploadSingleFile(file) {
+    const form = new FormData();
+    form.append("name", name);
+    form.append("email", email);
+    form.append("photo", file);
+
+    const url = `${apiUrl}/api/upload`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      body: form,
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+
+      // Check if we got an HTML response (wrong server)
+      if (txt.includes("<!DOCTYPE html>") || txt.includes("<html>")) {
+        throw new Error("Upload went to wrong server. Make sure backend is running on port 3001.");
+      }
+
+      throw new Error(txt || "Upload failed");
+    }
+
+    const data = await res.json();
+    return data.success;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     resetMessages();
     if (!validate()) return;
+
     setSubmitting(true);
+
     try {
-      const form = new FormData();
-      form.append("name", name);
-      form.append("email", email);
-      form.append("photo", file);
+      const totalFiles = files.length;
+      let successCount = 0;
+      let failedFiles = [];
 
-      const url = `${apiUrl}/api/upload`;
-      console.log("=== UPLOAD DEBUG ===");
-      console.log("API_BASE:", apiUrl);
-      console.log("Upload URL:", url);
-      console.log("Form data - name:", name, "email:", email, "file:", file?.name);
+      // Upload files sequentially
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setUploadProgress(`Uploading ${i + 1} of ${totalFiles}...`);
 
-      const res = await fetch(url, {
-        method: "POST",
-        body: form,
-      });
-
-      console.log("Response status:", res.status);
-      console.log("Response URL:", res.url);
-
-      if (!res.ok) {
-        const txt = await res.text();
-        console.error("Upload failed - Status:", res.status);
-        console.error("Upload failed - Response:", txt.substring(0, 500)); // First 500 chars
-
-        // Check if we got an HTML response (wrong server)
-        if (txt.includes("<!DOCTYPE html>") || txt.includes("<html>")) {
-          throw new Error("Upload went to wrong server. Make sure backend is running on port 3001.");
+        try {
+          const success = await uploadSingleFile(file);
+          if (success) {
+            successCount++;
+          } else {
+            failedFiles.push(file.name);
+          }
+        } catch (err) {
+          console.error(`Failed to upload ${file.name}:`, err);
+          failedFiles.push(file.name);
         }
-
-        throw new Error(txt || "Upload failed");
       }
-      const data = await res.json();
-      console.log("Upload success:", data); // Debug log
-      setStatus("Upload successful. Thank you!");
-      // Don't clear name and email - they're saved in localStorage
-      setFile(null);
-      setPreview(null);
-      setInputMode(null);
+
+      // Show results
+      if (successCount === totalFiles) {
+        setStatus(`All ${totalFiles} photo${totalFiles > 1 ? "s" : ""} uploaded successfully!`);
+        setFiles([]);
+        setPreviews([]);
+        setInputMode(null);
+      } else if (successCount > 0) {
+        setStatus(`${successCount} of ${totalFiles} photos uploaded successfully.`);
+        setError(`Failed to upload: ${failedFiles.join(", ")}`);
+      } else {
+        setError(`Failed to upload all photos: ${failedFiles.join(", ")}`);
+      }
     } catch (err) {
       setError("Upload error: " + (err.message || err));
     } finally {
       setSubmitting(false);
+      setUploadProgress(null);
     }
   }
 
@@ -234,7 +345,7 @@ export default function UploadForm() {
           type="file"
           accept="image/*"
           capture="environment"
-          onChange={handleFileChange}
+          onChange={(e) => handleFileChange(e, "camera")}
           style={{ display: "none" }}
         />
         <input
@@ -242,18 +353,28 @@ export default function UploadForm() {
           name="photo-gallery"
           type="file"
           accept="image/*"
-          onChange={handleFileChange}
+          multiple
+          onChange={(e) => handleFileChange(e, "gallery")}
           style={{ display: "none" }}
         />
-        <small className="hint">Max 5MB. {file ? `Selected: ${file.name}` : ""}</small>
+        <small className="hint">
+          Max 10MB per photo. {inputMode === "gallery" ? `Up to ${MAX_FILES} photos.` : ""}
+          {files.length > 0 ? ` Selected: ${files.length} photo${files.length > 1 ? "s" : ""}` : ""}
+        </small>
       </div>
 
-      {preview && (
-        <div className="preview">
-          <img src={preview} alt="preview" />
+      {previews.length > 0 && (
+        <div className="preview-container">
+          {previews.map((preview, index) => (
+            <div key={index} className="preview">
+              <img src={preview.url} alt={`preview ${index + 1}`} />
+              <small className="preview-name">{preview.name}</small>
+            </div>
+          ))}
         </div>
       )}
 
+      {uploadProgress && <div className="upload-progress">{uploadProgress}</div>}
       {error && <div className="error">{error}</div>}
       {status && <div className="status">{status}</div>}
 
