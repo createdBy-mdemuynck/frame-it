@@ -39,3 +39,21 @@ Seeded at team creation.
 ## Orchestration Entry - 2026-04-03T15:03:27Z
 - Astra: Fixed missing onclick handler on gallery thumbnails. Added onclick="openModal('${photo.photoPath}')" to thumbnail images in renderGallery(). Gallery thumbnails now open full-size lightbox on click/tap. See orchestration log for details.
 
+## Orchestration Entry - 2026-04-07T14:30:00Z
+- Astra: Assigned to implement multi-file upload UI in UploadForm.jsx. Scope: support up to 10 files, 10MB per file validation, camera vs gallery modes, file previews. Coordinating with Orion (backend) and Calypso (testing). See orchestration log for details.
+
+## Learnings (2026-04-07 - Multi-file Upload)
+- Updated UploadForm.jsx to support multiple file uploads (up to 10 files from gallery, single from camera)
+- Increased max file size from 5MB to 10MB per photo (MAX_FILE_SIZE = 10 * 1024 * 1024)
+- Implemented dual upload modes:
+  - Camera mode: Single photo capture with **automatic upload** after capture (user must fill name/email first)
+  - Gallery mode: Multiple selection (up to 10 photos) with manual submit, uses `multiple` attribute on file input
+- Client-side validation per file: size ≤10MB, type must be image/*, reject invalid files with descriptive errors
+- Sequential upload strategy: Files uploaded one-by-one to existing backend endpoint (which uses `upload.single("photo")`)
+- UX improvements: Grid preview layout for multiple photos, upload progress indicator, per-file error reporting, success summary
+- Updated CSS (web/src/styles.css): Added `.preview-container` grid layout, `.upload-progress` indicator, `.preview-name` for file names
+- State management: Converted from single file/preview to arrays (files[], previews[]) to handle multiple selections
+- Auto-submit in camera mode validates name/email before triggering upload, preventing incomplete submissions
+- Key file paths: web/src/components/UploadForm.jsx, web/src/styles.css
+- Backend coordination needed: Current backend only handles single files; if batch upload in single request is desired, backend needs `upload.array('photo', 10)` instead of `upload.single('photo')`
+

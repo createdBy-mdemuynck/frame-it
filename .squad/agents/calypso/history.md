@@ -19,3 +19,24 @@ Seeded at team creation.
 
 ## Orchestration Entry - 2026-03-25T20:48:56Z
 - Calypso: test plan completed; merged decision into .squad/decisions.md and artifacts produced (tests/automation-plan.md, tests/test-skeletons).
+
+## Learnings (2026-04-07)
+- Updated upload requirements: file size limit increased from 5MB to 10MB per file
+- Added batch upload support: camera mode (single immediate) vs gallery mode (1-10 files per batch)
+- Created comprehensive batch upload test cases in tests/upload_flow.md (cases 2a-2h)
+- Created new test skeleton: tests/test-skeletons/batch-upload.md (P0 priority, 10 scenarios)
+- Updated automation-plan.md with batch-upload.test.ts and camera-mode.test.ts as P0
+- Updated all fixture requirements: large.jpg now 11MB, added batch fixture sets
+- Key test scenarios added:
+  * Batch count validation (1-10 allowed, 11+ rejected)
+  * Per-file size validation in batch context (10MB per file)
+  * Mixed valid/invalid file handling (atomic vs partial success - TBD by Scribe)
+  * Duplicate files in same batch (dedup rules - TBD by Scribe)
+  * Network interruption during batch upload
+  * Empty batch validation
+- Created decision document: .squad/decisions/inbox/calypso-batch-upload.md
+- Open questions for Scribe: atomic vs partial success, duplicate handling, total request size, timeout SLAs
+- Test plan now covers both upload modes distinctly: camera (immediate single file) and gallery (batch 1-10 files)
+
+## Orchestration Entry - 2026-04-07T14:30:00Z
+- Calypso: Assigned to create test coverage for multi-file upload feature. Scope: test 1-10 file uploads, 10MB per file validation, edge cases (empty, invalid types, boundaries), batch processing success/failure scenarios. Requires Astra and Orion implementations to be complete. See orchestration log for details.
