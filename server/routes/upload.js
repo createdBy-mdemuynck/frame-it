@@ -70,8 +70,8 @@ module.exports = (uploadsRoot) => {
       try {
         console.log(`📸 Generating thumbnail for ${finalPath}`);
         await sharp(finalPath)
-          .rotate(0) // Preserve orientation as uploaded
-          .resize(150, 150, { fit: "cover" })
+          .rotate() // Auto-orient based on EXIF
+          .resize(300, 300, { fit: "cover" })
           .toFile(thumbnailPath);
 
         thumbnailGenerated = true;

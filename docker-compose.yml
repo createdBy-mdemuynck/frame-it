@@ -45,9 +45,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      # Browser requests go through the host, so use localhost
-      # Internal Next.js SSR requests use the Docker network
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      # Use Docker network for API URL in local development
+      - NEXT_PUBLIC_API_URL=http://backoffice:3001
     networks:
       - frameit-network
     depends_on:

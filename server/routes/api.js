@@ -22,6 +22,30 @@ function saveStars(uploadsRoot, stars) {
 }
 
 module.exports = (uploadsRoot) => {
+  // Get all votes for each picture (super admin only)
+  router.get("/admin/picture-votes", requireSuperAdmin, (req, res) => {
+    try {
+      const stars = loadStars(uploadsRoot);
+      const { photoPath } = req.query;
+
+      // If photoPath is provided, return voters for that specific photo
+      if (photoPath) {
+        const voters = stars[photoPath] && Array.isArray(stars[photoPath].starredBy) ? stars[photoPath].starredBy : [];
+        return res.json({ success: true, voters });
+      }
+
+      // Otherwise, return all votes
+      const votes = {};
+      for (const [photoPath, data] of Object.entries(stars)) {
+        votes[photoPath] = Array.isArray(data.starredBy) ? data.starredBy : [];
+      }
+      res.json({ success: true, votes });
+    } catch (error) {
+      console.error("Error fetching picture votes:", error);
+      res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  });
+
   // Admin Login API
   router.post("/admin/login", (req, res) => {
     const { email } = req.body;
@@ -49,11 +73,11 @@ module.exports = (uploadsRoot) => {
     try {
       const photos = [];
       const stars = loadStars(uploadsRoot);
-      
+
       if (!fs.existsSync(uploadsRoot)) {
         return res.json({ success: true, photos: [] });
       }
-      
+
       const folders = fs
         .readdirSync(uploadsRoot, { withFileTypes: true })
         .filter((dirent) => dirent.isDirectory() && dirent.name !== "tmp");
@@ -90,6 +114,13 @@ module.exports = (uploadsRoot) => {
             starred,
           });
         });
+      });
+
+      // Sort by uploadedAt timestamp - newest first
+      photos.sort((a, b) => {
+        const dateA = a.metadata?.uploadedAt ? new Date(a.metadata.uploadedAt) : new Date(0);
+        const dateB = b.metadata?.uploadedAt ? new Date(b.metadata.uploadedAt) : new Date(0);
+        return dateB - dateA; // Descending order (newest first)
       });
 
       res.json({ success: true, photos });

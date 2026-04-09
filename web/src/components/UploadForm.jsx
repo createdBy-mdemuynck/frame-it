@@ -59,18 +59,26 @@ export default function UploadForm() {
   useEffect(() => {
     if (email) localStorage.setItem("userEmail", email);
   }, [email]);
-
-  async function checkServerHealth() {
-    try {
-      const res = await fetch(`${apiUrl}/health`);
-      if (res.ok) {
-        setServerStatus("connected");
-      } else {
-        setServerStatus("error");
+  // Retry server health check up to 3 times with delay
+  async function checkServerHealth(retries = 3, delayMs = 1000) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch(`${apiUrl}/health`);
+        if (res.ok) {
+          setServerStatus("connected");
+          return;
+        } else {
+          setServerStatus("error");
+        }
+      } catch (err) {
+        console.error(`Server health check failed (attempt ${attempt}):`, err);
+        if (attempt === retries) {
+          setServerStatus("offline");
+        } else {
+          // Wait before retrying
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
       }
-    } catch (err) {
-      console.error("Server health check failed:", err);
-      setServerStatus("offline");
     }
   }
 
@@ -336,9 +344,6 @@ export default function UploadForm() {
           </p>
           <p className="event-info">De uitreiking van de prijzen vindt plaats om XX uur @de afsprong (Afsneedorp 22)</p>
         </div>
-        {serverStatus === "offline" && (
-          <div className="error">⚠️ Kan geen verbinding maken met de server op {apiUrl}. Zorg dat de server actief is.</div>
-        )}
         {serverStatus === "checking" && <div className="status">Serververbinding controleren...</div>}
 
         <div className="field contact-fields">

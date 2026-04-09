@@ -24,7 +24,7 @@ function regenerateThumbnails(userDir) {
     } else {
       console.log(`⏳ Generating: ${thumbPath}`);
       sharp(srcPath)
-        .resize(150, 150)
+        .resize(300, 300, { fit: "cover" })
         .toFile(thumbPath)
         .then(() => console.log(`✅ Generated: ${thumbPath}`))
         .catch((err) => console.error(`❌ Error generating ${thumbPath}:`, err.message));
