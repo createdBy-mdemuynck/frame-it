@@ -342,7 +342,7 @@ export default function UploadForm() {
           <p>
             <strong>Vergeet zeker ook niet jouw contactgegevens achter te laten.</strong>
           </p>
-          <p className="event-info">De uitreiking van de prijzen vindt plaats om XX uur @de afsprong (Afsneedorp 22)</p>
+          <p className="event-info">De uitreiking van de prijzen vindt plaats om 18 uur @de afsprong (Afsneedorp 22)</p>
         </div>
         {serverStatus === "checking" && <div className="status">Serververbinding controleren...</div>}
 
