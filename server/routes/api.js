@@ -57,7 +57,7 @@ module.exports = (uploadsRoot) => {
     }
 
     req.session.adminEmail = email;
-    
+
     // Explicitly save session before responding
     req.session.save((err) => {
       if (err) {
