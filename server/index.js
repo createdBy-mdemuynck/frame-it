@@ -12,6 +12,11 @@ const { requireAuthPage, isSuperAdmin } = require("./middleware/auth");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy when in production (Azure Container Apps)
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 // Configure view engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));

@@ -49,14 +49,28 @@ module.exports = (uploadsRoot) => {
   // Admin Login API
   router.post("/admin/login", (req, res) => {
     const { email } = req.body;
+    console.log(`[LOGIN] Attempt from: ${email}`);
+
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      console.log(`[LOGIN] Invalid email format: ${email}`);
       return res.status(400).json({ success: false, error: "Valid email is required" });
     }
+
     req.session.adminEmail = email;
-    res.json({ success: true, email });
+    
+    // Explicitly save session before responding
+    req.session.save((err) => {
+      if (err) {
+        console.error(`[LOGIN] Session save error:`, err);
+        return res.status(500).json({ success: false, error: "Failed to save session" });
+      }
+      console.log(`[LOGIN] Session saved for: ${email}, Session ID: ${req.sessionID}`);
+      res.json({ success: true, email });
+    });
   });
 
   router.get("/admin/session", (req, res) => {
+    console.log(`[SESSION CHECK] Session ID: ${req.sessionID}, Email: ${req.session.adminEmail || "none"}`);
     if (req.session.adminEmail) {
       return res.json({ loggedIn: true, email: req.session.adminEmail });
     }
