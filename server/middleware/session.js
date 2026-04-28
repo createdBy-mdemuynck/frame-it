@@ -10,9 +10,11 @@ const sessionMiddleware = session({
   resave: false,
   saveUninitialized: false,
   cookie: {
+    // For local/dev: allow non-HTTPS and more relaxed SameSite for mobile compatibility
     secure: isProduction, // true in production (HTTPS required)
     httpOnly: true,
-    sameSite: "lax", // "lax" works for same-origin requests (login is on backoffice)
+    sameSite: "lax", // "lax" is compatible with most mobile browsers for same-origin
+    // If you need cross-site cookies (e.g. different domain for API), use "none" and secure: true
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
   proxy: isProduction, // trust first proxy in production (Azure Container Apps)
