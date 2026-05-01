@@ -170,8 +170,9 @@ module backoffice 'core/host/container-app.bicep' = {
     corsAllowedOrigins: ['*']
     cpu: '0.5'
     memory: '1Gi'
-    minReplicas: 0
+    minReplicas: 1
     maxReplicas: 10
+    stickySessionAffinity: 'sticky'
   }
   dependsOn: [
     acrPullRoleAssignment

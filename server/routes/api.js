@@ -56,16 +56,24 @@ module.exports = (uploadsRoot) => {
       return res.status(400).json({ success: false, error: "Valid email is required" });
     }
 
-    req.session.adminEmail = email;
-
-    // Explicitly save session before responding
-    req.session.save((err) => {
+    // Regenerate session to issue a fresh session ID (prevents session fixation
+    // and ensures stale cookies from a previous/dead session are replaced)
+    req.session.regenerate((err) => {
       if (err) {
-        console.error(`[LOGIN] Session save error:`, err);
-        return res.status(500).json({ success: false, error: "Failed to save session" });
+        console.error(`[LOGIN] Session regenerate error:`, err);
+        return res.status(500).json({ success: false, error: "Session error" });
       }
-      console.log(`[LOGIN] Session saved for: ${email}, Session ID: ${req.sessionID}`);
-      res.json({ success: true, email });
+
+      req.session.adminEmail = email;
+
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error(`[LOGIN] Session save error:`, saveErr);
+          return res.status(500).json({ success: false, error: "Failed to save session" });
+        }
+        console.log(`[LOGIN] Session saved for: ${email}, Session ID: ${req.sessionID}`);
+        res.json({ success: true, email });
+      });
     });
   });
 
@@ -78,8 +86,13 @@ module.exports = (uploadsRoot) => {
   });
 
   router.post("/admin/logout", (req, res) => {
-    req.session.destroy();
-    res.json({ success: true });
+    req.session.destroy((err) => {
+      res.clearCookie("connect.sid");
+      if (err) {
+        return res.status(500).json({ success: false, error: "Logout failed" });
+      }
+      res.json({ success: true });
+    });
   });
 
   // Gallery API - Get all photos with metadata

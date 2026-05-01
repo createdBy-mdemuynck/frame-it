@@ -17,7 +17,13 @@ function requireAuth(req, res, next) {
  */
 function requireAuthPage(req, res, next) {
   if (!req.session.adminEmail) {
-    return res.redirect("/");
+    // Destroy the stale session (if any) and clear the cookie so the browser
+    // doesn't keep sending a dead session ID, which would prevent a clean login.
+    req.session.destroy(() => {
+      res.clearCookie("connect.sid");
+      res.redirect("/");
+    });
+    return;
   }
   next();
 }

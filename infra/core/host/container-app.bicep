@@ -16,6 +16,8 @@ param memory string = '0.5Gi'
 param minReplicas int = 0
 param maxReplicas int = 10
 param volumeMounts array = []
+@allowed(['sticky', 'none'])
+param stickySessionAffinity string = 'none'
 
 resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: name
@@ -36,6 +38,9 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         targetPort: targetPort
         transport: 'auto'
         allowInsecure: false
+        stickySessions: {
+          affinity: stickySessionAffinity
+        }
         corsPolicy: enableCors ? {
           allowedOrigins: corsAllowedOrigins
           allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
